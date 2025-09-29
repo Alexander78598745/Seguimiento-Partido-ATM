@@ -1,0 +1,1583 @@
+/* Variables globales */
+:root {
+    --atletico-red: #CE2029;
+    --atletico-blue: #1B2951;
+    --atletico-white: #FFFFFF;
+    --field-green: #4CAF50;
+    --field-dark-green: #2E7D32;
+    --field-light-green: #66BB6A;
+    --goalkeeper-color: #FFC107;
+    --defender-color: #2196F3;
+    --midfielder-color: #4CAF50;
+    --forward-color: #FF5722;
+}
+
+/* Reset y configuración base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--atletico-red), var(--atletico-blue));
+    min-height: 100vh;
+    color: var(--atletico-white);
+}
+
+#app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header del partido */
+.match-header {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--atletico-blue);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.team-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.team-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid var(--atletico-red);
+}
+
+.team-name {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.match-score {
+    text-align: center;
+}
+
+.score-display {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--atletico-red);
+    margin-bottom: 10px;
+}
+
+.score-separator {
+    margin: 0 20px;
+}
+
+.match-time {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#matchTimer {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--atletico-blue);
+}
+
+#matchPeriod {
+    font-size: 14px;
+    color: #666;
+}
+
+.match-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item label {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--atletico-blue);
+}
+
+.detail-item input,
+.detail-item select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.detail-item input:focus,
+.detail-item select:focus {
+    outline: none;
+    border-color: var(--atletico-red);
+}
+
+/* Controles del partido */
+.match-controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.control-btn {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.control-btn.start {
+    background: var(--field-green);
+    color: white;
+}
+
+.control-btn.pause {
+    background: #FF9800;
+    color: white;
+}
+
+.control-btn.end {
+    background: var(--atletico-red);
+    color: white;
+}
+
+.control-btn.export {
+    background: var(--atletico-blue);
+    color: white;
+}
+
+.control-btn.new {
+    background: var(--field-green);
+    color: white;
+}
+
+.control-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Controles de goles */
+.goal-controls {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.goal-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.goal-control-group label {
+    font-weight: bold;
+    color: var(--atletico-blue);
+    font-size: 16px;
+}
+
+.goal-buttons {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.goal-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+    min-width: 60px;
+}
+
+.goal-btn.add {
+    background: var(--field-green);
+    color: white;
+}
+
+.goal-btn.remove {
+    background: var(--atletico-red);
+    color: white;
+}
+
+.goal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.goal-display {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--atletico-red);
+    background: white;
+    border: 3px solid var(--atletico-red);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Gestión de jugadores */
+.players-management {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--atletico-blue);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.players-management h3 {
+    margin-bottom: 15px;
+    color: var(--atletico-red);
+}
+
+/* Tabs de gestión */
+.management-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    border: none;
+    background: none;
+    color: var(--atletico-blue);
+    font-weight: bold;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    color: var(--atletico-red);
+    border-bottom-color: var(--atletico-red);
+}
+
+.tab-btn:hover {
+    background: rgba(206, 32, 41, 0.1);
+}
+
+/* Formularios de gestión */
+.add-player-form,
+.edit-player-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.edit-select {
+    grid-column: 1 / -1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background: white;
+}
+
+.edit-select:focus {
+    outline: none;
+    border-color: var(--atletico-red);
+}
+
+/* Selector de titulares */
+.starter-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(240, 240, 240, 0.5);
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}
+
+.available-players,
+.selected-starters {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.available-players h4,
+.selected-starters h4 {
+    margin-bottom: 15px;
+    color: var(--atletico-red);
+    text-align: center;
+    font-size: 16px;
+}
+
+.players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    min-height: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 5px;
+}
+
+.player-card {
+    background: var(--atletico-white);
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 12px;
+}
+
+.player-card:hover {
+    border-color: var(--atletico-red);
+    background: rgba(206, 32, 41, 0.1);
+    transform: translateY(-2px);
+}
+
+.player-card.selected {
+    background: var(--atletico-red);
+    color: white;
+    border-color: var(--atletico-blue);
+}
+
+.player-card .number {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--atletico-red);
+}
+
+.player-card.selected .number {
+    color: white;
+}
+
+.player-card .name {
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+.player-card .position {
+    font-size: 9px;
+    color: #666;
+    margin-top: 3px;
+}
+
+.player-card.selected .position {
+    color: #ccc;
+}
+
+/* Estilo para jugadores desconvocados */
+.player-card.uncalled {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff5722;
+    color: #d32f2f;
+}
+
+.player-card.uncalled:hover {
+    background: rgba(255, 0, 0, 0.2);
+    border-color: #d32f2f;
+}
+
+.player-card.uncalled .number {
+    color: #d32f2f;
+}
+
+/* Sección de desconvocados */
+.uncalled-section {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+}
+
+.uncalled-section h4 {
+    margin-bottom: 15px;
+    color: var(--atletico-red);
+    text-align: center;
+    font-size: 16px;
+}
+
+.uncalled-players-management {
+    display: block;
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(240, 240, 240, 0.5);
+    border-radius: 10px;
+    border: 2px solid #ddd;
+}
+
+.add-player-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    align-items: end;
+}
+
+.add-player-form input,
+.add-player-form select {
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.add-player-form input:focus,
+.add-player-form select:focus {
+    outline: none;
+    border-color: var(--atletico-red);
+}
+
+.add-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background: var(--atletico-red);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.add-btn:hover {
+    background: #B31E24;
+    transform: translateY(-1px);
+}
+
+/* Campo de fútbol completamente rediseñado */
+.field-container {
+    background: var(--field-green);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(45deg, 
+        var(--field-green) 0%, 
+        var(--field-light-green) 25%,
+        var(--field-green) 50%,
+        var(--field-light-green) 75%,
+        var(--field-green) 100%);
+}
+
+.field {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: var(--field-green);
+    border: 4px solid white;
+    border-radius: 10px;
+    overflow: hidden;
+    background-image: 
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 40px,
+            rgba(255,255,255,0.1) 40px,
+            rgba(255,255,255,0.1) 80px
+        );
+}
+
+/* Líneas del campo */
+.field-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* Líneas laterales */
+.sideline {
+    position: absolute;
+    background: white;
+}
+
+.sideline.top {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+}
+
+.sideline.bottom {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+}
+
+.sideline.left {
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+}
+
+.sideline.right {
+    right: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+}
+
+/* Línea central */
+.center-line {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: 100%;
+    background: white;
+    transform: translateX(-50%);
+}
+
+.center-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 180px;
+    height: 180px;
+    border: 3px solid white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: none;
+}
+
+.center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Áreas grandes (18 yardas) */
+.penalty-area {
+    position: absolute;
+    width: 165px;
+    height: 400px;
+    border: 3px solid white;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+}
+
+.penalty-area.left {
+    left: 0;
+    border-right: none;
+    border-radius: 0 10px 10px 0;
+}
+
+.penalty-area.right {
+    right: 0;
+    border-left: none;
+    border-radius: 10px 0 0 10px;
+}
+
+/* Líneas frontales del área (las que faltaban) */
+.penalty-area-front {
+    position: absolute;
+    width: 3px;
+    height: 400px;
+    background: white;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.penalty-area-front.left {
+    left: 165px;
+}
+
+.penalty-area-front.right {
+    right: 165px;
+}
+
+/* Áreas pequeñas (6 yardas) */
+.goal-area {
+    position: absolute;
+    width: 55px;
+    height: 180px;
+    border: 3px solid white;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+}
+
+.goal-area.left {
+    left: 0;
+    border-right: none;
+}
+
+.goal-area.right {
+    right: 0;
+    border-left: none;
+}
+
+/* Líneas frontales del área pequeña */
+.goal-area-front {
+    position: absolute;
+    width: 3px;
+    height: 180px;
+    background: white;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.goal-area-front.left {
+    left: 55px;
+}
+
+.goal-area-front.right {
+    right: 55px;
+}
+
+/* Porterías */
+.goal {
+    position: absolute;
+    width: 8px;
+    height: 80px;
+    background: white;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 4px;
+}
+
+.goal.left {
+    left: -8px;
+}
+
+.goal.right {
+    right: -8px;
+}
+
+/* Puntos de penalti */
+.penalty-spot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.penalty-spot.left {
+    left: 120px;
+}
+
+.penalty-spot.right {
+    right: 120px;
+}
+
+/* Arcos del área de penalti */
+.penalty-arc {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border: 3px solid white;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+}
+
+.penalty-arc.left {
+    left: 75px;
+    clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
+}
+
+.penalty-arc.right {
+    right: 75px;
+    clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+}
+
+/* Jugadores en el campo */
+.players-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.player {
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    border: 4px solid white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    transition: all 0.2s ease;
+    font-weight: bold;
+    font-size: 12px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    touch-action: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    /* Mejorado para tablets */
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+}
+
+.player:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    border-color: #FFD700;
+}
+
+.player:active,
+.player.dragging {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.15);
+    z-index: 1000;
+    border-color: #FFD700;
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8);
+    /* Feedback adicional para tablet */
+    filter: brightness(1.1);
+}
+
+.player.selected {
+    border-color: #FFD700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+    50% { box-shadow: 0 0 40px rgba(255, 215, 0, 1); }
+    100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+}
+
+.player .number {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    line-height: 1;
+}
+
+.player .name {
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    text-align: center;
+    line-height: 1;
+}
+
+.player .minutes {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 15px;
+    border: 2px solid white;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive para tablets */
+@media (max-width: 1024px) and (orientation: landscape) {
+    .player {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .player .number {
+        font-size: 22px;
+    }
+    
+    .player .name {
+        font-size: 12px;
+        max-width: 65px;
+    }
+    
+    .player .minutes {
+        font-size: 12px;
+        bottom: -30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .player {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .player .number {
+        font-size: 18px;
+    }
+    
+    .player .name {
+        font-size: 10px;
+        max-width: 55px;
+    }
+}
+
+/* Colores por posición */
+.player.GK {
+    background: linear-gradient(135deg, var(--goalkeeper-color), #FFB300);
+}
+
+.player.DEF {
+    background: linear-gradient(135deg, var(--defender-color), #1976D2);
+}
+
+.player.MID {
+    background: linear-gradient(135deg, var(--midfielder-color), #388E3C);
+}
+
+.player.FWD {
+    background: linear-gradient(135deg, var(--forward-color), #D84315);
+}
+
+/* Sección inferior */
+.bottom-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* Panel de suplentes */
+.substitutes-panel {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--atletico-blue);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.substitutes-panel h3 {
+    margin-bottom: 15px;
+    color: var(--atletico-red);
+}
+
+.substitutes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.substitute {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: white;
+}
+
+.substitute:hover {
+    border-color: var(--atletico-red);
+    background: rgba(206, 32, 41, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.substitute.selected {
+    border-color: var(--atletico-red);
+    background: rgba(206, 32, 41, 0.2);
+}
+
+.substitute .player-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    border: 2px solid white;
+}
+
+.substitute .player-info {
+    flex: 1;
+}
+
+.substitute .player-info .name {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.substitute .player-info .position {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Cronología del partido */
+.match-timeline {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--atletico-blue);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.match-timeline h3 {
+    margin-bottom: 15px;
+    color: var(--atletico-red);
+}
+
+.timeline-events {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.timeline-event {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 14px;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    min-height: 45px;
+    position: relative;
+    overflow: visible; /* CAMBIO CRÍTICO: visible en lugar de hidden */
+}
+
+.timeline-event:hover {
+    background: #f8f9fa;
+    transform: translateX(3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--atletico-red);
+}
+
+.timeline-event .event-description {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+    overflow: visible; /* CAMBIO CRÍTICO: visible en lugar de hidden */
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    /* REFUERZO: Asegurar orientación horizontal */
+    flex-direction: row !important;
+    text-align: left !important;
+    writing-mode: horizontal-tb !important;
+}
+
+/* Estructura limpia y horizontal para todos los textos de eventos */
+.timeline-event .event-description .event-text {
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    width: 100%;
+    display: block;
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    /* CRÍTICO: Garantizar texto horizontal */
+    white-space: normal !important;
+    text-orientation: mixed !important;
+    writing-mode: horizontal-tb !important;
+    direction: ltr !important;
+}
+
+/* Colores específicos por tipo de evento */
+.timeline-event.goal_home {
+    border-left: 4px solid var(--atletico-red);
+    background: rgba(206, 32, 41, 0.05);
+}
+
+.timeline-event.goal_home .event-text {
+    color: var(--atletico-red);
+    font-weight: 600;
+}
+
+.timeline-event.goal_away {
+    border-left: 4px solid #ff9800;
+    background: rgba(255, 152, 0, 0.05);
+}
+
+.timeline-event.goal_away .event-text {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.timeline-event.goal_cancelled {
+    border-left: 4px solid #e91e63;
+    background: rgba(233, 30, 99, 0.05);
+}
+
+.timeline-event.goal_cancelled .event-text {
+    color: #e91e63;
+    font-weight: 600;
+    text-decoration: line-through;
+}
+
+.timeline-event.substitution {
+    border-left: 4px solid var(--atletico-blue);
+    background: rgba(27, 41, 81, 0.05);
+}
+
+.timeline-event.substitution .event-text {
+    color: var(--atletico-blue);
+}
+
+/* ARREGLO: Estilos específicos para tarjetas amarillas y rojas */
+.timeline-event.card_yellow {
+    border-left: 4px solid #ffc107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.timeline-event.card_yellow .event-text {
+    color: #f57c00;
+    font-weight: 600;
+}
+
+.timeline-event.card_red {
+    border-left: 4px solid #f44336;
+    background: rgba(244, 67, 54, 0.05);
+}
+
+.timeline-event.card_red .event-text {
+    color: #d32f2f;
+    font-weight: 600;
+}
+
+.timeline-event.card {
+    border-left: 4px solid #ffc107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.timeline-event.card .event-text {
+    color: #f57c00;
+}
+
+.timeline-event.injury {
+    border-left: 4px solid #f44336;
+    background: rgba(244, 67, 54, 0.05);
+}
+
+.timeline-event.injury .event-text {
+    color: #d32f2f;
+}
+
+.timeline-event.start_match,
+.timeline-event.end_first_half,
+.timeline-event.start_second_half,
+.timeline-event.end_match {
+    border-left: 4px solid #4caf50;
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.timeline-event.start_match .event-text,
+.timeline-event.end_first_half .event-text,
+.timeline-event.start_second_half .event-text,
+.timeline-event.end_match .event-text {
+    color: #388e3c;
+    font-weight: 600;
+}
+
+/* Estilo para eventos con error */
+.timeline-event.error {
+    border-left: 4px solid #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+.timeline-event.error .event-text {
+    color: #d32f2f;
+    font-style: italic;
+}ze: 14px;
+    font-weight: 500;
+}
+
+.timeline-event.goal {
+    border-left-color: #4CAF50;
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.timeline-event.goal .minute {
+    background: rgba(76, 175, 80, 0.15);
+    color: #2E7D32;
+}
+
+.timeline-event.goal_cancelled {
+    border-left-color: #f44336;
+    background: rgba(244, 67, 54, 0.05);
+}
+
+.timeline-event.goal_cancelled .minute {
+    background: rgba(244, 67, 54, 0.15);
+    color: #c62828;
+}
+
+.timeline-event.card {
+    border-left-color: #FFC107;
+    background: rgba(255, 193, 7, 0.05);
+}
+
+.timeline-event.card .minute {
+    background: rgba(255, 193, 7, 0.15);
+    color: #f57c00;
+}
+
+.timeline-event.substitution {
+    border-left-color: #2196F3;
+    background: rgba(33, 150, 243, 0.05);
+}
+
+.timeline-event.substitution .minute {
+    background: rgba(33, 150, 243, 0.15);
+    color: #1565c0;
+}
+
+/* Mensaje de eventos vacíos */
+.timeline-events p {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+/* Modales */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: var(--atletico-blue);
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+    margin-bottom: 20px;
+    color: var(--atletico-red);
+    text-align: center;
+}
+
+/* Acciones del jugador */
+.player-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.action-option {
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.action-option:hover {
+    border-color: var(--atletico-red);
+    background: rgba(206, 32, 41, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Formularios */
+.goal-form,
+.substitution-form,
+.card-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.goal-form label,
+.substitution-form label,
+.card-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.goal-form select,
+.substitution-form select,
+.card-form select {
+    padding: 10px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.goal-form select:focus,
+.substitution-form select:focus,
+.card-form select:focus {
+    outline: none;
+    border-color: var(--atletico-red);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.confirm-btn {
+    background: var(--atletico-red);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.confirm-btn:hover {
+    background: #B31E24;
+    transform: translateY(-1px);
+}
+
+.cancel-btn {
+    background: #6c757d;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.cancel-btn:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+/* Scrollbars personalizados */
+.timeline-events::-webkit-scrollbar,
+.substitutes-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.timeline-events::-webkit-scrollbar-track,
+.substitutes-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.timeline-events::-webkit-scrollbar-thumb,
+.substitutes-list::-webkit-scrollbar-thumb {
+    background: var(--atletico-red);
+    border-radius: 10px;
+}
+
+.timeline-events::-webkit-scrollbar-thumb:hover,
+.substitutes-list::-webkit-scrollbar-thumb:hover {
+    background: #B31E24;
+}
+
+/* Responsive para tablets */
+@media (max-width: 1024px) {
+    .bottom-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .field {
+        height: 500px;
+    }
+    
+    .player {
+        width: 50px;
+        height: 50px;
+        font-size: 11px;
+    }
+    
+    .player .number {
+        font-size: 16px;
+    }
+    
+    .player .name {
+        font-size: 9px;
+    }
+    
+    .goal-controls {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .management-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .substitutes-list {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+    
+    .starter-selection {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .players-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    #app {
+        padding: 15px;
+    }
+    
+    .team-info {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .match-details {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .field {
+        height: 400px;
+    }
+    
+    .player {
+        width: 45px;
+        height: 45px;
+        font-size: 10px;
+    }
+    
+    .player .number {
+        font-size: 14px;
+    }
+    
+    .player .name {
+        font-size: 8px;
+    }
+    
+    .control-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    
+    .add-player-form,
+    .edit-player-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .player-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .goal-controls {
+        padding: 15px;
+    }
+    
+    .goal-control-group label {
+        font-size: 14px;
+    }
+    
+    .management-tabs {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .tab-btn {
+        padding: 10px 15px;
+        text-align: center;
+    }
+    
+    .starter-selection {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    .players-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        max-height: 200px;
+        gap: 8px;
+    }
+    
+    .player-card {
+        padding: 8px;
+        font-size: 11px;
+    }
+    
+    .player-card .number {
+        font-size: 14px;
+    }
+    
+    .player-card .name {
+        font-size: 9px;
+    }
+    
+    .player-card .position {
+        font-size: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .match-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .score-display {
+        font-size: 36px;
+    }
+    
+    #matchTimer {
+        font-size: 20px;
+    }
+    
+    .field {
+        height: 350px;
+    }
+    
+    .player {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .substitutes-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Estilos para jugadores desconvocados */
+.uncalled-players-management {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--atletico-blue);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+}
+
+.uncalled-section h4 {
+    color: var(--atletico-red);
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.players-grid .player-card.uncalled {
+    border: 2px solid #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+    opacity: 0.7;
+}
+
+.players-grid .player-card.uncalled:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+    .uncalled-players-management {
+        grid-template-columns: 1fr;
+    }
+}

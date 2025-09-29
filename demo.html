@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Atlético Analyzer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #CE2029, #1B2951);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1B2951;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+        .feature-demo {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #CE2029;
+            text-align: center;
+        }
+        .feature-demo h3 {
+            color: #CE2029;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        .feature-demo img {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+        }
+        .feature-list {
+            text-align: left;
+            margin: 15px 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+            padding-left: 10px;
+        }
+        .demo-button {
+            display: inline-block;
+            background: #CE2029;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .demo-button:hover {
+            background: #B31E24;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .instructions {
+            background: #e3f2fd;
+            border-left: 5px solid #2196F3;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .instructions h4 {
+            color: #1976D2;
+            margin-bottom: 15px;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        .field-preview {
+            width: 300px;
+            height: 200px;
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            border: 3px solid white;
+            border-radius: 10px;
+            margin: 15px auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .field-preview::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+        .field-preview::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: white;
+        }
+        .player-demo {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .player-demo.gk { background: #FFC107; top: 50%; left: 10%; transform: translateY(-50%); }
+        .player-demo.def1 { background: #2196F3; top: 30%; left: 25%; }
+        .player-demo.def2 { background: #2196F3; top: 70%; left: 25%; }
+        .player-demo.mid { background: #4CAF50; top: 50%; left: 50%; transform: translateY(-50%); }
+        .player-demo.fwd { background: #FF5722; top: 50%; left: 75%; transform: translateY(-50%); }
+        .timeline-demo {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #CE2029;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .timeline-minute {
+            font-weight: bold;
+            color: #CE2029;
+            min-width: 30px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <img src="escudo_atletico.png" alt="Atlético de Madrid" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid #CE2029;">
+            <h1 style="color: #CE2029; margin: 15px 0;">⚽ ATLÉTICO ANALYZER - DEMO</h1>
+            <p style="font-size: 18px; color: #666;">Aplicación Completa de Análisis para Fútbol Base</p>
+            
+            <div style="margin: 20px 0;">
+                <a href="index.html" class="demo-button">🚀 ABRIR APLICACIÓN</a>
+                <a href="install.html" class="demo-button">📱 GUÍA DE INSTALACIÓN</a>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h4>🎯 ¿Cómo usar la aplicación?</h4>
+            <div class="step">
+                <strong>1.</strong> Añade jugadores con dorsal, nombre, alias y posición
+            </div>
+            <div class="step">
+                <strong>2.</strong> Arrastra los jugadores al campo para posicionarlos
+            </div>
+            <div class="step">
+                <strong>3.</strong> Haz clic en "Iniciar Partido" para comenzar el análisis
+            </div>
+            <div class="step">
+                <strong>4.</strong> Toca cualquier jugador para registrar acciones (goles, tarjetas, etc.)
+            </div>
+            <div class="step">
+                <strong>5.</strong> Al final, exporta todo a PDF con cronología completa
+            </div>
+        </div>
+
+        <div class="demo-grid">
+            <div class="feature-demo">
+                <h3>⚽ Campo Visual Interactivo</h3>
+                <div class="field-preview">
+                    <div class="player-demo gk">1</div>
+                    <div class="player-demo def1">2</div>
+                    <div class="player-demo def2">5</div>
+                    <div class="player-demo mid">8</div>
+                    <div class="player-demo fwd">9</div>
+                </div>
+                <ul class="feature-list">
+                    <li>✓ Campo de fútbol realista con líneas profesionales</li>
+                    <li>✓ Porterías orientadas correctamente (izq/der)</li>
+                    <li>✓ Jugadores arrastrables con colores por posición</li>
+                    <li>✓ Dorsales y alias visibles</li>
+                    <li>✓ Minutos jugados en tiempo real</li>
+                </ul>
+            </div>
+
+            <div class="feature-demo">
+                <h3>📊 Análisis Completo</h3>
+                <div class="timeline-demo">
+                    <div class="timeline-item">
+                        <div class="timeline-minute">0'</div>
+                        <div>⚽ Inicio del partido</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-minute">15'</div>
+                        <div>⚽ Gol de Griezmann (Asistencia: Koke)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-minute">30'</div>
+                        <div>🟨 Tarjeta amarilla para Molina</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-minute">45'</div>
+                        <div>🔄 Cambio: Sale Morata (45'), entra Correa</div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>✓ Cronología completa de eventos</li>
+                    <li>✓ Goles marcados y recibidos</li>
+                    <li>✓ Sistema de tarjetas amarillas/rojas</li>
+                    <li>✓ Control de cambios y minutos</li>
+                </ul>
+            </div>
+
+            <div class="feature-demo">
+                <h3>🎯 Acciones Detalladas</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0;">
+                    <div style="background: #4CAF50; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">⚽ Gol Marcado</div>
+                    <div style="background: #FF5722; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">🥅 Gol Recibido</div>
+                    <div style="background: #FFC107; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">🟨 Tarjeta</div>
+                    <div style="background: #2196F3; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">🔄 Cambio</div>
+                    <div style="background: #9C27B0; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">🚑 Lesión</div>
+                    <div style="background: #607D8B; color: white; padding: 10px; border-radius: 8px; font-size: 12px;">📝 Otros</div>
+                </div>
+                <ul class="feature-list">
+                    <li>✓ 14 tipos diferentes de goles</li>
+                    <li>✓ Registro de asistencias</li>
+                    <li>✓ Control de lesiones</li>
+                    <li>✓ Motivos detallados de tarjetas</li>
+                </ul>
+            </div>
+
+            <div class="feature-demo">
+                <h3>💾 Funcionalidad Offline</h3>
+                <div style="text-align: center; margin: 15px 0; font-size: 48px;">📱📶❌</div>
+                <ul class="feature-list">
+                    <li>✓ Funciona sin conexión a internet</li>
+                    <li>✓ Jugadores guardados permanentemente</li>
+                    <li>✓ Instalable como app nativa</li>
+                    <li>✓ Optimizada para tablets Android/iOS</li>
+                    <li>✓ Almacenamiento local automático</li>
+                </ul>
+            </div>
+
+            <div class="feature-demo">
+                <h3>📄 Exportación PDF</h3>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <div style="background: white; padding: 10px; border-left: 4px solid #CE2029; margin: 5px 0; font-size: 12px;">
+                        <strong>ATLÉTICO DE MADRID</strong><br>
+                        ANÁLISIS DEL PARTIDO<br>
+                        Rival: Real Madrid | Fecha: 2024-03-15
+                    </div>
+                    <div style="background: #f5f5f5; padding: 8px; margin: 5px 0; font-size: 10px;">
+                        CRONOLOGÍA DEL PARTIDO<br>
+                        0' - Inicio del partido<br>
+                        15' - Gol de Griezmann...
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>✓ PDF profesional con escudo del club</li>
+                    <li>✓ Cronología completa de eventos</li>
+                    <li>✓ Minutos jugados por cada jugador</li>
+                    <li>✓ Información detallada del partido</li>
+                </ul>
+            </div>
+
+            <div class="feature-demo">
+                <h3>⚙️ Configuración Fácil</h3>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                        <div style="background: white; padding: 8px; border-radius: 5px;">📅 Fecha</div>
+                        <div style="background: white; padding: 8px; border-radius: 5px;">🏟️ Campo</div>
+                        <div style="background: white; padding: 8px; border-radius: 5px;">⚽ Rival</div>
+                        <div style="background: white; padding: 8px; border-radius: 5px;">🏠 Local/Visit</div>
+                    </div>
+                </div>
+                <ul class="feature-list">
+                    <li>✓ Configuración adaptada a fútbol base</li>
+                    <li>✓ Categorías: Juvenil, Cadete, Infantil...</li>
+                    <li>✓ Sin jugadores predeterminados</li>
+                    <li>✓ Gestión completa de plantilla</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="instructions" style="background: #c8e6c9; border-left-color: #4CAF50;">
+            <h4 style="color: #2E7D32;">✅ ¡Listo para usar!</h4>
+            <p><strong>La aplicación está completamente configurada y lista para analizar partidos de fútbol base del Atlético de Madrid.</strong></p>
+            <p>Solo tienes que añadir tus jugadores y empezar a analizar partidos de forma profesional.</p>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="index.html" class="demo-button" style="font-size: 18px; padding: 20px 40px;">
+                    🚀 COMENZAR ANÁLISIS
+                </a>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px; color: #CE2029;">
+            <h2>🏆 ¡Aupa Atleti!</h2>
+            <p><strong>Por Atlético de Madrid</strong></p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px;">
+                Aplicación profesional para análisis de partidos de equipos base
+            </p>
+        </div>
+    </div>
+</body>
+</html>

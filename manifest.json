@@ -1,0 +1,50 @@
+{
+    "name": "Análisis de Partidos - Atlético de Madrid",
+    "short_name": "AtléticoAnalyzer",
+    "description": "Aplicación completa para análisis de partidos de fútbol del Atlético de Madrid",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#CE2029",
+    "theme_color": "#CE2029",
+    "orientation": "landscape-primary",
+    "scope": "./",
+    "lang": "es-ES",
+    "categories": ["sports", "productivity"],
+    "icons": [
+        {
+            "src": "escudo_atletico.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "escudo_atletico.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Nuevo Partido",
+            "short_name": "Nuevo",
+            "description": "Iniciar análisis de un nuevo partido",
+            "url": "./index.html",
+            "icons": [
+                {
+                    "src": "escudo_atletico.png",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "escudo_atletico.png",
+            "type": "image/png",
+            "sizes": "1280x720",
+            "form_factor": "wide"
+        }
+    ],
+    "prefer_related_applications": false
+}

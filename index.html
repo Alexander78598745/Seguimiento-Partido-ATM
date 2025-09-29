@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEGUIMIENTO PARTIDO - Atlético de Madrid</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#CE2029">
+    <link rel="icon" type="image/png" href="escudo_atletico.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Header con información del partido -->
+        <header class="match-header">
+            <div class="team-info">
+                <div class="team home-team">
+                    <img src="escudo_atletico.png" alt="Atlético de Madrid" class="team-logo">
+                    <span class="team-name">ATLÉTICO DE MADRID</span>
+                </div>
+                
+                <div class="match-score">
+                    <div class="score-display">
+                        <span id="homeScore">0</span>
+                        <span class="score-separator">-</span>
+                        <span id="awayScore">0</span>
+                    </div>
+                    <div class="match-time">
+                        <span id="matchTimer">00:00</span>
+                        <span id="matchPeriod">Pre-partido</span>
+                    </div>
+                </div>
+                
+                <div class="team away-team">
+                    <img id="awayTeamLogo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Ccircle cx='30' cy='30' r='28' fill='%23666666' stroke='%23333' stroke-width='2'/%3E%3Ctext x='30' y='35' text-anchor='middle' fill='white' font-family='Arial' font-size='12' font-weight='bold'%3ERIVAL%3C/text%3E%3C/svg%3E" alt="Rival" class="team-logo">
+                    <span id="awayTeamName" class="team-name">RIVAL</span>
+                </div>
+            </div>
+            
+            <div class="match-details">
+                <div class="detail-item">
+                    <label>Fecha:</label>
+                    <input type="date" id="matchDate" value="">
+                </div>
+                <div class="detail-item">
+                    <label>Campo:</label>
+                    <input type="text" id="matchVenue" placeholder="Nombre del campo">
+                </div>
+                <div class="detail-item">
+                    <label>Rival:</label>
+                    <input type="text" id="rivalName" placeholder="Nombre del rival">
+                </div>
+                <div class="detail-item">
+                    <label>Local/Visitante:</label>
+                    <select id="homeAway">
+                        <option value="local">Local</option>
+                        <option value="visitante">Visitante</option>
+                    </select>
+                </div>
+                <div class="detail-item">
+                    <label>Categoría:</label>
+                    <input type="text" id="category" value="ALEVIN B F11" readonly>
+                </div>
+                <div class="detail-item">
+                    <label>Jornada:</label>
+                    <select id="matchDay">
+                        <option value="">Seleccionar jornada</option>
+                        <option value="1">Jornada 1</option>
+                        <option value="2">Jornada 2</option>
+                        <option value="3">Jornada 3</option>
+                        <option value="4">Jornada 4</option>
+                        <option value="5">Jornada 5</option>
+                        <option value="6">Jornada 6</option>
+                        <option value="7">Jornada 7</option>
+                        <option value="8">Jornada 8</option>
+                        <option value="9">Jornada 9</option>
+                        <option value="10">Jornada 10</option>
+                        <option value="11">Jornada 11</option>
+                        <option value="12">Jornada 12</option>
+                        <option value="13">Jornada 13</option>
+                        <option value="14">Jornada 14</option>
+                        <option value="15">Jornada 15</option>
+                        <option value="16">Jornada 16</option>
+                        <option value="17">Jornada 17</option>
+                        <option value="18">Jornada 18</option>
+                        <option value="19">Jornada 19</option>
+                        <option value="20">Jornada 20</option>
+                        <option value="21">Jornada 21</option>
+                        <option value="22">Jornada 22</option>
+                        <option value="23">Jornada 23</option>
+                        <option value="24">Jornada 24</option>
+                        <option value="25">Jornada 25</option>
+                        <option value="26">Jornada 26</option>
+                        <option value="27">Jornada 27</option>
+                        <option value="28">Jornada 28</option>
+                        <option value="29">Jornada 29</option>
+                        <option value="30">Jornada 30</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <!-- Controles del partido -->
+        <div class="match-controls">
+            <button id="startMatch" class="control-btn start">Iniciar Partido</button>
+            <button id="endFirstHalf" class="control-btn pause" disabled>Final 1º Tiempo</button>
+            <button id="startSecondHalf" class="control-btn start" disabled>Inicio 2º Tiempo</button>
+            <button id="endMatch" class="control-btn end" disabled>Final Partido</button>
+            <button id="exportPDF" class="control-btn export" disabled>📄 Exportar PDF</button>
+            <button id="newMatch" class="control-btn new">🆕 Nuevo Partido</button>
+        </div>
+        
+        <!-- Controles de goles -->
+        <div class="goal-controls">
+            <div class="goal-control-group">
+                <label>Goles Atlético:</label>
+                <div class="goal-buttons">
+                    <button id="addHomeGoal" class="goal-btn add">+ Gol</button>
+                    <span id="homeGoalDisplay" class="goal-display">0</span>
+                    <button id="removeHomeGoal" class="goal-btn remove">- Gol</button>
+                </div>
+            </div>
+            <div class="goal-control-group">
+                <label>Goles Rival:</label>
+                <div class="goal-buttons">
+                    <button id="addAwayGoal" class="goal-btn add">+ Gol</button>
+                    <span id="awayGoalDisplay" class="goal-display">0</span>
+                    <button id="removeAwayGoal" class="goal-btn remove">- Gol</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestión de jugadores (arriba del campo) -->
+        <div class="players-management">
+            <h3>Gestión de Jugadores</h3>
+            <div class="management-tabs">
+                <button id="loadDefaultPlayersBtn" class="tab-btn active">Cargar Plantilla Base</button>
+                <button id="selectStartersBtn" class="tab-btn">Elegir Titulares (11)</button>
+                <button id="addCustomPlayerBtn" class="tab-btn">Añadir Jugador</button>
+                <button id="editPlayerBtn" class="tab-btn">Editar Jugador</button>
+                <button id="uncalledPlayersBtn" class="tab-btn">Desconvocados</button>
+            </div>
+            
+            <!-- Selector de titulares -->
+            <div class="starter-selection" id="starterSelection" style="display: none;">
+                <div class="available-players">
+                    <h4>Jugadores Disponibles</h4>
+                    <div id="availablePlayersList" class="players-grid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="selected-starters">
+                    <h4>Titulares Seleccionados (<span id="starterCount">0</span>/11)</h4>
+                    <div id="selectedStartersList" class="players-grid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                    <button id="confirmStarters" class="confirm-btn" disabled>Confirmar Alineación</button>
+                </div>
+            </div>
+            
+            <div class="add-player-form" id="customPlayerForm" style="display: none;">
+                <input type="text" id="playerName" placeholder="Nombre completo">
+                <input type="text" id="playerAlias" placeholder="Alias/Apodo">
+                <input type="number" id="playerNumber" placeholder="Dorsal" min="1" max="99">
+                <select id="playerPosition">
+                    <option value="GK">Portero</option>
+                    <option value="DEF">Defensa</option>
+                    <option value="MID">Centrocampista</option>
+                    <option value="FWD">Delantero</option>
+                </select>
+                <button id="confirmAddPlayer" class="add-btn">Añadir Jugador</button>
+            </div>
+            <div class="edit-player-form" id="editPlayerForm" style="display: none;">
+                <select id="selectPlayerToEdit" class="edit-select">
+                    <option value="">Seleccionar jugador...</option>
+                </select>
+                <input type="text" id="editPlayerName" placeholder="Nombre completo">
+                <input type="text" id="editPlayerAlias" placeholder="Alias/Apodo">
+                <input type="number" id="editPlayerNumber" placeholder="Dorsal" min="1" max="99">
+                <select id="editPlayerPosition">
+                    <option value="GK">Portero</option>
+                    <option value="DEF">Defensa</option>
+                    <option value="MID">Centrocampista</option>
+                    <option value="FWD">Delantero</option>
+                </select>
+                <button id="confirmEditPlayer" class="add-btn">Guardar Cambios</button>
+            </div>
+
+            <!-- Gestión de jugadores desconvocados -->
+            <div class="uncalled-players-management" id="uncalledPlayersManagement" style="display: none;">
+                <div class="uncalled-section">
+                    <h4>Jugadores Disponibles</h4>
+                    <div id="availableForUncalledList" class="players-grid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+                <div class="uncalled-section">
+                    <h4>Jugadores Desconvocados</h4>
+                    <div id="uncalledPlayersList" class="players-grid">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                    <button id="saveUncalledPlayers" class="confirm-btn" style="margin-top: 15px;">Guardar Desconvocados</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Campo de fútbol -->
+        <div class="field-container">
+            <div class="field" id="footballField">
+                <!-- Líneas del campo -->
+                <div class="field-lines">
+                    <!-- Líneas laterales -->
+                    <div class="sideline top"></div>
+                    <div class="sideline bottom"></div>
+                    <div class="sideline left"></div>
+                    <div class="sideline right"></div>
+                    
+                    <!-- Línea central -->
+                    <div class="center-line"></div>
+                    <div class="center-circle"></div>
+                    <div class="center-dot"></div>
+                    
+                    <!-- Área grande izquierda -->
+                    <div class="penalty-area left"></div>
+                    <!-- Línea frontal área grande izquierda -->
+                    <div class="penalty-area-front left"></div>
+                    <!-- Área pequeña izquierda -->
+                    <div class="goal-area left"></div>
+                    <!-- Línea frontal área pequeña izquierda -->
+                    <div class="goal-area-front left"></div>
+                    <!-- Portería izquierda -->
+                    <div class="goal left"></div>
+                    
+                    <!-- Área grande derecha -->
+                    <div class="penalty-area right"></div>
+                    <!-- Línea frontal área grande derecha -->
+                    <div class="penalty-area-front right"></div>
+                    <!-- Área pequeña derecha -->
+                    <div class="goal-area right"></div>
+                    <!-- Línea frontal área pequeña derecha -->
+                    <div class="goal-area-front right"></div>
+                    <!-- Portería derecha -->
+                    <div class="goal right"></div>
+                    
+                    <!-- Puntos de penalti -->
+                    <div class="penalty-spot left"></div>
+                    <div class="penalty-spot right"></div>
+                    
+                    <!-- Arcos de área -->
+                    <div class="penalty-arc left"></div>
+                    <div class="penalty-arc right"></div>
+                </div>
+                
+                <!-- Jugadores en el campo -->
+                <div id="playersOnField" class="players-container">
+                    <!-- Los jugadores se generarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-section">
+            <!-- Panel de jugadores suplentes -->
+            <div class="substitutes-panel">
+                <h3>Suplentes</h3>
+                <div id="substitutesList" class="substitutes-list">
+                    <!-- Los suplentes se generarán dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Cronología del partido -->
+            <div class="match-timeline">
+                <h3>Cronología del Partido</h3>
+                <div id="timelineEvents" class="timeline-events">
+                    <!-- Los eventos se generarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de acciones del jugador -->
+    <div id="playerActionsModal" class="modal">
+        <div class="modal-content">
+            <h3 id="playerActionTitle">Acciones del Jugador</h3>
+            <div class="player-actions">
+                <button class="action-option" data-action="goal-scored">⚽ Gol Marcado</button>
+                <button class="action-option" data-action="goal-conceded">🥅 Gol Recibido</button>
+                <button class="action-option" data-action="yellow-card">🟨 Tarjeta Amarilla</button>
+                <button class="action-option" data-action="red-card">🟥 Tarjeta Roja</button>
+                <button class="action-option" data-action="substitution">🔄 Cambio</button>
+                <button class="action-option" data-action="injury">🚑 Lesión</button>
+                <button class="action-option" data-action="cancel">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de gol -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <h3 id="goalModalTitle">Registrar Gol</h3>
+            <div class="goal-form">
+                <label>Goleador:</label>
+                <select id="goalScorer"></select>
+                
+                <label>Tipo de gol:</label>
+                <select id="goalType">
+                    <option value="pie-derecho">Pie derecho</option>
+                    <option value="pie-izquierdo">Pie izquierdo</option>
+                    <option value="cabeza">De cabeza</option>
+                    <option value="frontal">Desde el frontal</option>
+                    <option value="corner">De corner</option>
+                    <option value="abp">A balón parado</option>
+                    <option value="penalty">Penalti</option>
+                    <option value="volea">De volea</option>
+                    <option value="chilena">Chilena</option>
+                    <option value="taconazo">Taconazo</option>
+                    <option value="rebote">De rebote</option>
+                    <option value="contragolpe">Contragolpe</option>
+                    <option value="jugada-personal">Jugada personal</option>
+                    <option value="own-goal">Gol en propia</option>
+                </select>
+                
+                <label>Asistencia (opcional):</label>
+                <select id="goalAssist">
+                    <option value="">Sin asistencia</option>
+                </select>
+                
+                <div class="modal-buttons">
+                    <button id="confirmGoal" class="confirm-btn">Confirmar Gol</button>
+                    <button id="cancelGoal" class="cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de cambio -->
+    <div id="substitutionModal" class="modal">
+        <div class="modal-content">
+            <h3>Realizar Cambio</h3>
+            <div class="substitution-form">
+                <label>Jugador que sale:</label>
+                <select id="playerOut"></select>
+                
+                <label>Jugador que entra:</label>
+                <select id="playerIn"></select>
+                
+                <div class="modal-buttons">
+                    <button id="confirmSubstitution" class="confirm-btn">Confirmar Cambio</button>
+                    <button id="cancelSubstitution" class="cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de tarjeta -->
+    <div id="cardModal" class="modal">
+        <div class="modal-content">
+            <h3 id="cardModalTitle">Tarjeta</h3>
+            <div class="card-form">
+                <label>Jugador:</label>
+                <select id="cardPlayer"></select>
+                
+                <label>Motivo:</label>
+                <select id="cardReason">
+                    <option value="falta">Falta</option>
+                    <option value="protesta">Protesta</option>
+                    <option value="juego-peligroso">Juego peligroso</option>
+                    <option value="conducta-antideportiva">Conducta antideportiva</option>
+                    <option value="retrasar-juego">Retrasar el juego</option>
+                    <option value="entrada-fuerte">Entrada fuerte</option>
+                    <option value="mano">Mano</option>
+                    <option value="simulacion">Simulación</option>
+                    <option value="doble-amarilla">Doble amarilla</option>
+                    <option value="agresion">Agresión</option>
+                </select>
+                
+                <div class="modal-buttons">
+                    <button id="confirmCard" class="confirm-btn">Confirmar Tarjeta</button>
+                    <button id="cancelCard" class="cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
