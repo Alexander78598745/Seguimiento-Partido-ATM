@@ -37,7 +37,8 @@ class MatchAnalyzer {
             homeScore: 0,
             awayScore: 0,
             events: [],
-            substitutions: 0
+            substitutions: 0,
+            firstHalfDuration: 0 // Duración real del primer tiempo en segundos
         };
 
         this.players = JSON.parse(localStorage.getItem('atletico_base_players')) || [];
@@ -58,6 +59,7 @@ class MatchAnalyzer {
         this.clearPredeterminedPlayers();
         
         this.setupEventListeners();
+        this.setupVisibilityHandlers(); // Nuevo: manejo de visibilidad
         this.renderPlayers();
         this.setupDefaultMatch();
         this.updateTimelineDisplay();
@@ -113,6 +115,27 @@ class MatchAnalyzer {
 
         // Fecha por defecto
         document.getElementById('matchDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    // Método para prevenir reinicios accidentales sin pausar el cronómetro
+    setupVisibilityHandlers() {
+        // Prevenir recargas accidentales durante partidos activos
+        window.addEventListener('beforeunload', (e) => {
+            if (this.matchData.isRunning || this.matchData.events.length > 0) {
+                e.preventDefault();
+                e.returnValue = '¿Estás seguro de que quieres salir? Se perderán los datos del partido actual.';
+                return e.returnValue;
+            }
+        });
+
+        // Cuando la página vuelve a ser visible, actualizar inmediatamente el cronómetro
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.matchData.isRunning) {
+                console.log('Página restaurada - actualizando cronómetro inmediatamente');
+                // Forzar una actualización inmediata al volver a ser visible
+                this.updateMatchTimer();
+            }
+        });
     }
 
     setupModalEventListeners() {
@@ -243,21 +266,32 @@ class MatchAnalyzer {
     }
 
     endFirstHalf() {
+        // Guardar la duración real del primer tiempo
+        this.matchData.firstHalfDuration = this.matchData.currentTime;
         this.matchData.isRunning = false;
         this.matchData.period = 'halftime';
         this.updateControls();
         this.updatePeriodDisplay('Descanso');
-        this.addTimelineEvent('end_first_half', 'FINAL PRIMER TIEMPO', '');
+        
+        const minutes = Math.floor(this.matchData.firstHalfDuration / 60);
+        const seconds = this.matchData.firstHalfDuration % 60;
+        const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        this.addTimelineEvent('end_first_half', `FINAL PRIMER TIEMPO (${timeStr})`, '');
+        
+        console.log(`Primer tiempo finalizado - Duración real: ${this.matchData.firstHalfDuration} segundos (${timeStr})`);
     }
 
     startSecondHalf() {
         this.matchData.isRunning = true;
         this.matchData.period = 'second';
-        this.matchData.startTime = new Date() - (45 * 60 * 1000); // Ajustar tiempo
+        // Usar la duración real del primer tiempo en lugar de asumir 45 minutos
+        this.matchData.startTime = new Date() - (this.matchData.firstHalfDuration * 1000);
         this.updateMatchTimer();
         this.updateControls();
         this.updatePeriodDisplay('2do Tiempo');
         this.addTimelineEvent('start_second_half', 'INICIO SEGUNDO TIEMPO', '');
+        
+        console.log(`Segundo tiempo iniciado - Continuando desde: ${this.matchData.firstHalfDuration} segundos`);
     }
 
     endMatch() {
@@ -280,7 +314,8 @@ class MatchAnalyzer {
                 homeScore: 0,
                 awayScore: 0,
                 events: [],
-                substitutions: 0
+                substitutions: 0,
+                firstHalfDuration: 0
             };
 
             // Reset de jugadores
@@ -325,7 +360,8 @@ class MatchAnalyzer {
         let elapsed = Math.floor((now - this.matchData.startTime) / 1000);
         
         if (this.matchData.period === 'second') {
-            elapsed = Math.max(elapsed, 45 * 60); // Mínimo 45 minutos para segundo tiempo
+            // Usar la duración real del primer tiempo como mínimo para el segundo tiempo
+            elapsed = Math.max(elapsed, this.matchData.firstHalfDuration);
         }
         
         this.matchData.currentTime = elapsed;
