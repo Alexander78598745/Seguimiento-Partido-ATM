@@ -287,6 +287,7 @@
                 <button class="action-option" data-action="goal-conceded">🥅 Gol Recibido</button>
                 <button class="action-option" data-action="yellow-card">🟨 Tarjeta Amarilla</button>
                 <button class="action-option" data-action="red-card">🟥 Tarjeta Roja</button>
+                <button class="action-option" data-action="rival-yellow-card">🟨 Tarjeta Amarilla Rival</button>
                 <button class="action-option" data-action="substitution">🔄 Cambio</button>
                 <button class="action-option" data-action="injury">🚑 Lesión</button>
                 <button class="action-option" data-action="cancel">❌ Cancelar</button>
@@ -377,6 +378,33 @@
                 <div class="modal-buttons">
                     <button id="confirmCard" class="confirm-btn">Confirmar Tarjeta</button>
                     <button id="cancelCard" class="cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de tarjeta amarilla rival -->
+    <div id="rivalCardModal" class="modal">
+        <div class="modal-content">
+            <h3>Tarjeta Amarilla - Jugador Rival</h3>
+            <div class="rival-card-form">
+                <label>Dorsal del jugador rival:</label>
+                <input type="number" id="rivalPlayerNumber" placeholder="Número de dorsal (1-99)" min="1" max="99">
+                
+                <label>Motivo:</label>
+                <select id="rivalCardReason">
+                    <option value="falta">Falta</option>
+                    <option value="protesta">Protesta</option>
+                    <option value="juego-peligroso">Juego peligroso</option>
+                    <option value="conducta-antideportiva">Conducta antideportiva</option>
+                    <option value="retrasar-juego">Retrasar el juego</option>
+                    <option value="entrada-fuerte">Entrada fuerte</option>
+                    <option value="simulacion">Simulación</option>
+                </select>
+                
+                <div class="modal-buttons">
+                    <button id="confirmRivalCard" class="confirm-btn">Confirmar Tarjeta</button>
+                    <button id="cancelRivalCard" class="cancel-btn">Cancelar</button>
                 </div>
             </div>
         </div>

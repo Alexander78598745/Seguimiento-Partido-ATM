@@ -38,7 +38,8 @@ class MatchAnalyzer {
             awayScore: 0,
             events: [],
             substitutions: 0,
-            firstHalfDuration: 0 // Duración real del primer tiempo en segundos
+            firstHalfDuration: 0, // Duración real del primer tiempo en segundos
+            originalStarters: [] // MODIFICACIÓN 2: Guardar titulares originales
         };
 
         this.players = JSON.parse(localStorage.getItem('atletico_base_players')) || [];
@@ -205,6 +206,10 @@ class MatchAnalyzer {
             document.getElementById('confirmCard').addEventListener('click', () => this.confirmCard());
             document.getElementById('cancelCard').addEventListener('click', () => this.closeModal('cardModal'));
 
+            // Modal de tarjeta amarilla rival
+            document.getElementById('confirmRivalCard').addEventListener('click', () => this.confirmRivalCard());
+            document.getElementById('cancelRivalCard').addEventListener('click', () => this.closeModal('rivalCardModal'));
+
             // Cerrar otros modales al hacer clic fuera
             document.querySelectorAll('.modal').forEach(modal => {
                 if (modal.id !== 'playerActionsModal') {
@@ -244,12 +249,21 @@ class MatchAnalyzer {
         
         console.log(`Iniciando partido con ${starters.length} titulares:`);
         
+        // MODIFICACIÓN 2: Guardar titulares originales para el PDF
+        this.matchData.originalStarters = starters.map(player => ({
+            number: player.number,
+            alias: player.alias,
+            fullName: player.fullName,
+            position: player.position
+        }));
+        
         // Inicializar entryMinute y datos para todos los titulares
         starters.forEach(player => {
             player.entryMinute = 0;
             player.minutesPlayed = 0;
             player.previousMinutes = 0;
             player.exitMinute = null;
+            player.enteredDuringHalftime = false; // Titulares no entran en descanso
             console.log(`Titular ${player.alias} inicializado: entry=0, played=0, prev=0`);
         });
         
@@ -260,7 +274,7 @@ class MatchAnalyzer {
         this.updateMatchTimer();
         this.updateControls();
         this.updatePeriodDisplay('1er Tiempo');
-        this.addTimelineEvent('start_match', 'INICIO DEL PARTIDO', '');
+        this.addTimelineEvent('start_match', 'INICIO DEL PARTIDO', '', 0);
         
         console.log('Partido iniciado correctamente');
     }
@@ -276,7 +290,7 @@ class MatchAnalyzer {
         const minutes = Math.floor(this.matchData.firstHalfDuration / 60);
         const seconds = this.matchData.firstHalfDuration % 60;
         const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        this.addTimelineEvent('end_first_half', `FINAL PRIMER TIEMPO (${timeStr})`, '');
+        this.addTimelineEvent('end_first_half', `FINAL PRIMER TIEMPO (${timeStr})`, '', minutes);
         
         console.log(`Primer tiempo finalizado - Duración real: ${this.matchData.firstHalfDuration} segundos (${timeStr})`);
     }
@@ -284,14 +298,16 @@ class MatchAnalyzer {
     startSecondHalf() {
         this.matchData.isRunning = true;
         this.matchData.period = 'second';
-        // Usar la duración real del primer tiempo en lugar de asumir 45 minutos
+        // CORRECCIÓN: Configurar startTime para continuar desde donde terminó el primer tiempo
+        this.matchData.currentTime = this.matchData.firstHalfDuration;
         this.matchData.startTime = new Date() - (this.matchData.firstHalfDuration * 1000);
         this.updateMatchTimer();
         this.updateControls();
         this.updatePeriodDisplay('2do Tiempo');
-        this.addTimelineEvent('start_second_half', 'INICIO SEGUNDO TIEMPO', '');
+        const secondHalfStartMinute = Math.floor(this.matchData.firstHalfDuration / 60);
+        this.addTimelineEvent('start_second_half', 'INICIO SEGUNDO TIEMPO', '', secondHalfStartMinute);
         
-        console.log(`Segundo tiempo iniciado - Continuando desde: ${this.matchData.firstHalfDuration} segundos`);
+        console.log(`Segundo tiempo iniciado - Continuando desde: ${this.matchData.firstHalfDuration} segundos (${secondHalfStartMinute} minutos)`);
     }
 
     endMatch() {
@@ -299,7 +315,10 @@ class MatchAnalyzer {
         this.matchData.period = 'finished';
         this.updateControls();
         this.updatePeriodDisplay('Finalizado');
-        this.addTimelineEvent('end_match', 'FINAL DEL PARTIDO', '');
+        const firstHalf = this.matchData.firstHalfDuration || 0;
+        const secondHalf = this.matchData.secondHalfDuration || 0;
+        const totalMatchMinutes = Math.floor((firstHalf + secondHalf) / 60);
+        this.addTimelineEvent('end_match', 'FINAL DEL PARTIDO', '', totalMatchMinutes);
         document.getElementById('exportPDF').disabled = false;
     }
 
@@ -315,7 +334,8 @@ class MatchAnalyzer {
                 awayScore: 0,
                 events: [],
                 substitutions: 0,
-                firstHalfDuration: 0
+                firstHalfDuration: 0,
+                originalStarters: [] // MODIFICACIÓN 2: Reset titulares originales
             };
 
             // Reset de jugadores
@@ -326,6 +346,7 @@ class MatchAnalyzer {
                 player.exitMinute = null;
                 player.isUncalled = false;
                 player.previousMinutes = 0; // Para fútbol base
+                player.enteredDuringHalftime = false; // Reset marca de descanso
             });
 
             // Reset de interfaz
@@ -386,21 +407,32 @@ class MatchAnalyzer {
         this.players.forEach(player => {
             // Solo actualizar minutos para jugadores que están actualmente en el campo
             if (player.isStarter && !player.isUncalled && (player.exitMinute === null || player.exitMinute === undefined)) {
-                let minutesToAdd = 0;
+                let newTotal = 0;
                 
-                // Si el jugador es titular desde el inicio (entryMinute es null, 0 o undefined)
+                // LÓGICA CORREGIDA: Calcular el total correcto
+                const previousMinutes = player.previousMinutes || 0; // Minutos de partidos/períodos anteriores
+                
                 if (player.entryMinute === null || player.entryMinute === 0 || player.entryMinute === undefined) {
-                    minutesToAdd = currentMinute;
-                } 
-                // Si el jugador entró durante el partido
-                else if (player.entryMinute !== null && player.entryMinute !== undefined && player.entryMinute > 0) {
-                    minutesToAdd = Math.max(0, currentMinute - player.entryMinute);
+                    // Titular desde inicio: cuenta desde minuto 0
+                    newTotal = currentMinute;
+                } else {
+                    // Jugador que entró por cambio
+                    if (player.enteredDuringHalftime) {
+                        // Cambio en descanso: solo cuenta desde inicio segundo tiempo + minutos previos
+                        if (this.matchData.period === 'second') {
+                            const firstHalfMinutes = Math.floor(this.matchData.firstHalfDuration / 60);
+                            const minutesInSecondHalf = Math.max(0, currentMinute - firstHalfMinutes);
+                            newTotal = previousMinutes + minutesInSecondHalf;
+                        } else {
+                            // Estamos en primer tiempo o descanso, solo cuenta minutos previos
+                            newTotal = previousMinutes;
+                        }
+                    } else {
+                        // Cambio normal: cuenta desde minuto de entrada + minutos previos
+                        const minutesSinceEntry = Math.max(0, currentMinute - player.entryMinute);
+                        newTotal = previousMinutes + minutesSinceEntry;
+                    }
                 }
-                
-                // Para fútbol base: si el jugador ya tenía minutos previos, los sumamos
-                // Esto permite múltiples entradas/salidas
-                const previousMinutes = player.previousMinutes || 0;
-                const newTotal = previousMinutes + minutesToAdd;
                 
                 // Solo actualizar si cambió
                 if (player.minutesPlayed !== newTotal) {
@@ -409,7 +441,7 @@ class MatchAnalyzer {
                     
                     // Logging solo para cambios significativos
                     if (currentMinute % 5 === 0) {
-                        console.log(`Minutos ${player.alias}: prev=${previousMinutes}, actual=${minutesToAdd}, total=${newTotal}`);
+                        console.log(`Minutos ${player.alias}: prev=${previousMinutes}, entrada=${player.entryMinute}, current=${currentMinute}, total=${newTotal}`);
                     }
                 }
             }
@@ -1423,6 +1455,17 @@ class MatchAnalyzer {
                 }
                 break;
                 
+            case 'rival-yellow-card':
+                console.log('>>> Iniciando procesamiento: Tarjeta amarilla rival');
+                try {
+                    this.openRivalCardModal();
+                    console.log('✓ Modal de tarjeta amarilla rival abierto exitosamente');
+                } catch (error) {
+                    console.error('ERROR en openRivalCardModal():', error);
+                    alert('Error específico en tarjeta amarilla rival: ' + error.message);
+                }
+                break;
+                
             case 'substitution':
                 console.log('>>> Iniciando procesamiento: Cambio de jugador');
                 try {
@@ -1453,7 +1496,7 @@ class MatchAnalyzer {
                 
             default:
                 console.error('ERROR: Acción no reconocida:', action);
-                alert(`Acción "${action}" no es válida. Acciones válidas: goal-scored, goal-conceded, yellow-card, red-card, substitution, injury, cancel`);
+                alert(`Acción "${action}" no es válida. Acciones válidas: goal-scored, goal-conceded, yellow-card, red-card, rival-yellow-card, substitution, injury, cancel`);
                 this.selectedPlayer = null;
                 break;
         }
@@ -1662,7 +1705,7 @@ class MatchAnalyzer {
     openSubstitutionModal() {
         console.log('=== ABRIENDO MODAL DE CAMBIO ===');
         console.log('Jugador seleccionado para cambio:', this.selectedPlayer?.alias || 'NINGUNO');
-        console.log('Cambios realizados:', this.matchData.substitutions, '/ 5');
+        console.log('Cambios realizados:', this.matchData.substitutions, '(ilimitados)');
         
         // VALIDACIÓN CRÍTICA: Verificar selectedPlayer antes de continuar
         if (!this.selectedPlayer) {
@@ -1677,11 +1720,7 @@ class MatchAnalyzer {
         
         console.log('✓ Validación de selectedPlayer exitosa');
         
-        if (this.matchData.substitutions >= 5) {
-            console.log('❌ Máximo de cambios alcanzado');
-            alert('Ya se han realizado el máximo de cambios permitidos (5)');
-            return;
-        }
+        // Cambios ilimitados habilitados
 
         // Validar elementos del DOM
         const modal = document.getElementById('substitutionModal');
@@ -1780,7 +1819,15 @@ class MatchAnalyzer {
             return;
         }
         
-        const currentMinute = this.matchData.isRunning ? Math.floor(this.matchData.currentTime / 60) : 0;
+        // CORRECCIÓN: Durante el descanso, usar la duración del primer tiempo como referencia
+        let currentMinute;
+        if (this.matchData.isRunning) {
+            currentMinute = Math.floor(this.matchData.currentTime / 60);
+        } else if (this.matchData.period === 'halftime') {
+            currentMinute = Math.floor(this.matchData.firstHalfDuration / 60);
+        } else {
+            currentMinute = 0;
+        }
 
         // Para fútbol base, calcular y guardar minutos acumulados del jugador que sale
         if (playerOut.isStarter) {
@@ -1809,8 +1856,25 @@ class MatchAnalyzer {
         playerIn.entryMinute = currentMinute;
         playerIn.exitMinute = null; // Asegurar que está en null
         
-        // Si no tiene previousMinutes, inicializar
-        if (!playerIn.previousMinutes) playerIn.previousMinutes = 0;
+        // CORRECCIÓN: Marcar específicamente si entra durante el descanso
+        if (this.matchData.period === 'halftime') {
+            playerIn.enteredDuringHalftime = true;
+        } else {
+            playerIn.enteredDuringHalftime = false;
+        }
+        
+        // CRÍTICO: Inicializar correctamente para jugadores que entran por primera vez
+        if (!playerIn.previousMinutes) {
+            playerIn.previousMinutes = 0;
+        }
+        
+        // CORRECCIÓN CRÍTICA: Si es un jugador que entra por primera vez, sus minutesPlayed deben ser 0
+        // IMPORTANTE: Solo si NO ha jugado antes (previousMinutes = 0)
+        if (!playerIn.hasOwnProperty('minutesPlayed') || (playerIn.previousMinutes === 0)) {
+            playerIn.minutesPlayed = 0;
+        }
+        
+        console.log(`Jugador ${playerIn.alias} entra en minuto ${currentMinute} con previousMinutes: ${playerIn.previousMinutes}`);
         
         // Posicionar el jugador que entra en la misma posición del que sale
         playerIn.x = playerOut.x;
@@ -1975,6 +2039,68 @@ class MatchAnalyzer {
         console.log('=== TARJETA CONFIRMADA EXITOSAMENTE ===');
     }
 
+    // Tarjeta amarilla rival
+    openRivalCardModal() {
+        console.log('=== ABRIENDO MODAL DE TARJETA AMARILLA RIVAL ===');
+        
+        const modal = document.getElementById('rivalCardModal');
+        const numberInput = document.getElementById('rivalPlayerNumber');
+        const reasonSelect = document.getElementById('rivalCardReason');
+
+        if (!modal) {
+            console.error('ERROR: No se encontró rivalCardModal');
+            alert('Error: Modal de tarjeta rival no encontrado. Recarga la página.');
+            return;
+        }
+
+        // Limpiar campos
+        if (numberInput) numberInput.value = '';
+        if (reasonSelect) reasonSelect.selectedIndex = 0;
+
+        modal.style.display = 'flex';
+        
+        // Enfocar el campo de número
+        if (numberInput) {
+            setTimeout(() => numberInput.focus(), 100);
+        }
+        
+        console.log('✓ Modal de tarjeta amarilla rival mostrado exitosamente');
+    }
+
+    confirmRivalCard() {
+        console.log('=== CONFIRMANDO TARJETA AMARILLA RIVAL ===');
+        
+        const numberInput = document.getElementById('rivalPlayerNumber');
+        const reasonSelect = document.getElementById('rivalCardReason');
+        
+        if (!numberInput || !reasonSelect) {
+            console.error('ERROR: No se encontraron los campos del modal rival');
+            alert('Error: Campos del modal no encontrados');
+            return;
+        }
+        
+        const playerNumber = numberInput.value.trim();
+        const reason = reasonSelect.value;
+        
+        if (!playerNumber || playerNumber < 1 || playerNumber > 99) {
+            alert('Ingresa un número de dorsal válido (1-99)');
+            return;
+        }
+
+        const currentMinute = this.matchData.isRunning ? Math.floor(this.matchData.currentTime / 60) : 0;
+        const description = `${currentMinute.toString().padStart(2, '0')}' - TARJETA AMARILLA RIVAL (#${playerNumber})${reason ? ` - ${reason}` : ''}`;
+
+        // Agregar a cronología
+        this.addTimelineEvent('rival_card_yellow', description, '');
+
+        console.log('✓ Tarjeta amarilla rival registrada:', description);
+        
+        this.closeModal('rivalCardModal');
+        this.selectedPlayer = null;
+        
+        console.log('=== TARJETA AMARILLA RIVAL CONFIRMADA EXITOSAMENTE ===');
+    }
+
     // Lesión
     registerInjury() {
         console.log('=== REGISTRANDO LESIÓN ===');
@@ -2004,20 +2130,7 @@ class MatchAnalyzer {
         console.log('=== ABRIENDO MODAL DE LESIÓN CON CAMBIO ===');
         console.log('Jugador lesionado:', this.selectedPlayer?.alias || 'NINGUNO');
         
-        // Verificar que no se hayan hecho los 5 cambios
-        if (this.matchData.substitutions >= 5) {
-            // Si no hay cambios disponibles, solo registrar lesión sin cambio
-            const currentMinute = this.matchData.isRunning ? Math.floor(this.matchData.currentTime / 60) : 0;
-            const description = `${currentMinute.toString().padStart(2, '0')}' - LESIÓN - ${this.selectedPlayer.alias}`;
-            
-            this.addTimelineEvent('injury', description, '');
-            
-            console.log('✓ Lesión registrada sin cambio (límite de cambios alcanzado)');
-            alert(`Lesión de ${this.selectedPlayer.alias} registrada. No se pueden hacer más cambios (5/5 realizados).`);
-            
-            this.selectedPlayer = null;
-            return;
-        }
+        // Cambios ilimitados habilitados para lesiones
 
         // Validar elementos del DOM
         const modal = document.getElementById('substitutionModal');
@@ -2082,8 +2195,27 @@ class MatchAnalyzer {
     }
 
     // Cronología - SISTEMA COMPLETAMENTE REDISEÑADO
-    addTimelineEvent(type, description, icon) {
-        const currentMinute = this.matchData.isRunning ? Math.floor(this.matchData.currentTime / 60) : 0;
+    addTimelineEvent(type, description, icon, forceMinute = null) {
+        // CORRECCIÓN: Lógica mejorada para asignar el minuto correcto del evento
+        let currentMinute = 0;
+        
+        if (forceMinute !== null) {
+            // Si se especifica un minuto explícitamente, usarlo
+            currentMinute = forceMinute;
+        } else if (this.matchData.isRunning) {
+            // Si el partido está en curso, usar el tiempo actual
+            currentMinute = Math.floor(this.matchData.currentTime / 60);
+        } else if (this.matchData.period === 'halftime') {
+            // Si estamos en descanso, usar la duración del primer tiempo
+            currentMinute = Math.floor(this.matchData.firstHalfDuration / 60);
+        } else if (this.matchData.period === 'second_half') {
+            // Si ya terminó el segundo tiempo, usar el tiempo total del partido
+            const halfDuration = this.matchData.settings.halfDuration;
+            currentMinute = Math.floor((this.matchData.firstHalfDuration + this.matchData.secondHalfDuration) / 60);
+        } else {
+            // Para eventos del inicio del partido o casos especiales
+            currentMinute = 0;
+        }
         
         const event = {
             id: Date.now() + Math.random(), // ID único para cada evento
@@ -2255,7 +2387,92 @@ class MatchAnalyzer {
             
             yPos += 15;
             
+            // Sección de alineación titular
+            if (yPos > 240) {
+                pdf.addPage();
+                yPos = 20;
+            }
+            
+            pdf.setFillColor(...atleticoBlue);
+            pdf.rect(10, yPos - 5, 190, 12, 'F');
+            
+            pdf.setFontSize(14);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text('ALINEACIÓN TITULAR (11 JUGADORES)', 20, yPos + 3);
+            
+            yPos += 20;
+            
+            // MODIFICACIÓN 2: Usar titulares originales en lugar de jugadores actuales en campo
+            const starterPlayers = this.matchData.originalStarters || [];
+            
+            if (starterPlayers.length > 0) {
+                // Ordenar por posición: GK, DEF, MID, FWD y luego por número
+                const positionOrder = { 'GK': 1, 'DEF': 2, 'MID': 3, 'FWD': 4 };
+                const sortedStarters = [...starterPlayers].sort((a, b) => {
+                    const posA = positionOrder[a.position] || 5;
+                    const posB = positionOrder[b.position] || 5;
+                    if (posA !== posB) return posA - posB;
+                    return a.number - b.number;
+                });
+                
+                // Encabezados de tabla
+                pdf.setFillColor(...lightGray);
+                pdf.rect(10, yPos - 3, 190, lineHeight + 2, 'F');
+                pdf.setFontSize(9);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('DORSAL', 15, yPos);
+                pdf.text('JUGADOR', 40, yPos);
+                pdf.text('POSICIÓN', 110, yPos);
+                pdf.text('NOMBRE COMPLETO', 150, yPos);
+                
+                yPos += lineHeight + 5;
+                pdf.setFont('helvetica', 'normal');
+                
+                sortedStarters.forEach((player, index) => {
+                    if (yPos > 275) {
+                        pdf.addPage();
+                        yPos = 20;
+                    }
+                    
+                    // Alternar colores de fila
+                    if (index % 2 === 0) {
+                        pdf.setFillColor(250, 250, 250);
+                        pdf.rect(10, yPos - 3, 190, lineHeight + 2, 'F');
+                    }
+                    
+                    pdf.setTextColor(0, 0, 0);
+                    pdf.text(`#${player.number}`, 15, yPos);
+                    pdf.text(player.alias, 40, yPos);
+                    pdf.text(this.getPositionName(player.position), 110, yPos);
+                    
+                    // Nombre completo truncado si es muy largo
+                    const fullName = player.fullName || player.alias;
+                    const truncatedName = fullName.length > 25 ? fullName.substring(0, 22) + '...' : fullName;
+                    pdf.text(truncatedName, 150, yPos);
+                    
+                    yPos += lineHeight;
+                });
+                
+                // Mostrar total de titulares
+                yPos += 5;
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(...atleticoRed);
+                pdf.text(`TOTAL TITULARES: ${sortedStarters.length}/11`, 20, yPos);
+                pdf.setFont('helvetica', 'normal');
+                
+            } else {
+                pdf.setTextColor(128, 128, 128);
+                pdf.text('No se han seleccionado jugadores titulares', 20, yPos);
+            }
+            
+            yPos += 20;
+            
             // Sección de cronología
+            if (yPos > 250) {
+                pdf.addPage();
+                yPos = 20;
+            }
+            
             pdf.setFillColor(...atleticoRed);
             pdf.rect(10, yPos - 5, 190, 12, 'F');
             
@@ -2269,7 +2486,71 @@ class MatchAnalyzer {
             pdf.setTextColor(0, 0, 0);
             
             if (this.matchData.events.length > 0) {
-                const sortedEvents = [...this.matchData.events].sort((a, b) => a.minute - b.minute);
+                // MODIFICACIÓN 3: Ordenar eventos cronológicamente desde minuto 0 hacia abajo
+                // Sistema de ordenamiento cronológico estricto
+                const firstHalfMinutes = Math.floor((this.matchData.firstHalfDuration || 1800) / 60);
+                
+                const sortedEvents = [...this.matchData.events].sort((a, b) => {
+                    // Crear un "momento del partido" para cada evento que considere:
+                    // 1. Período del partido (primer tiempo < descanso < segundo tiempo)
+                    // 2. Minuto dentro del período
+                    // 3. Orden lógico de eventos dentro del mismo minuto
+                    
+                    function getEventMoment(event) {
+                        let periodMultiplier = 0;
+                        let internalOrder = 0;
+                        
+                        // Definir período base
+                        if (event.type === 'start_match') {
+                            periodMultiplier = 0;
+                            internalOrder = 0;
+                        } else if (event.type === 'end_first_half') {
+                            periodMultiplier = 1000;
+                            internalOrder = 900; // Final del primer tiempo
+                        } else if (event.type === 'substitution' && event.minute === firstHalfMinutes) {
+                            // CORRECCIÓN: Cambios del descanso van después del final del primer tiempo
+                            periodMultiplier = 1000;
+                            internalOrder = 950; // Entre final primer tiempo e inicio segundo tiempo
+                        } else if (event.type === 'start_second_half') {
+                            periodMultiplier = 1000;
+                            internalOrder = 999; // Inicio del segundo tiempo
+                        } else if (event.type === 'end_match') {
+                            periodMultiplier = 3000;
+                            internalOrder = 999; // Final del partido
+                        } else {
+                            // Eventos normales del juego
+                            if (event.minute <= firstHalfMinutes) {
+                                periodMultiplier = 0; // Primer tiempo
+                            } else {
+                                periodMultiplier = 2000; // Segundo tiempo
+                            }
+                            
+                            // Orden dentro del minuto
+                            const typeOrder = {
+                                'goal_home': 1, 
+                                'goal_away': 1,
+                                'card_yellow': 2,
+                                'card_red': 2,
+                                'rival_card_yellow': 2,
+                                'injury': 3,
+                                'substitution': 4
+                            };
+                            internalOrder = (typeOrder[event.type] || 5) * 10;
+                        }
+                        
+                        return periodMultiplier + (event.minute * 10) + internalOrder;
+                    }
+                    
+                    const momentA = getEventMoment(a);
+                    const momentB = getEventMoment(b);
+                    
+                    if (momentA !== momentB) {
+                        return momentA - momentB;
+                    }
+                    
+                    // Si tienen el mismo momento, ordenar por timestamp de creación
+                    return new Date(a.timestamp) - new Date(b.timestamp);
+                });
                 
                 sortedEvents.forEach((event, index) => {
                     // Alternar colores de fondo para mejor legibilidad
