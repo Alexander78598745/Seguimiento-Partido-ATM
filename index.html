@@ -4,14 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEGUIMIENTO PARTIDO - Atlético de Madrid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#CE2029">
     <link rel="icon" type="image/png" href="escudo_atletico.png">
+    <!-- Lucide Icons para iconos modernos -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div id="app">
+        <!-- Header moderno con escudo y degradado -->
+        <div class="hero-header">
+            <div class="header-background"></div>
+            <div class="header-content">
+                <div class="club-identity">
+                    <img src="escudo_atletico.png" alt="Atlético de Madrid" class="club-logo">
+                    <div class="club-info">
+                        <h1 class="club-name">ATLÉTICO DE MADRID</h1>
+                        <p class="club-motto">Nunca dejes de Creer</p>
+                    </div>
+                </div>
+                <div class="app-title">
+                    <i data-lucide="clipboard-list"></i>
+                    <div class="app-title-text">
+                        <span>Análisis de Partido</span>
+                        <div class="app-version">V.6.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Header con información del partido -->
         <header class="match-header">
             <div class="team-info">
@@ -40,30 +66,30 @@
             
             <div class="match-details">
                 <div class="detail-item">
-                    <label>Fecha:</label>
+                    <label><i data-lucide="calendar"></i>Fecha:</label>
                     <input type="date" id="matchDate" value="">
                 </div>
                 <div class="detail-item">
-                    <label>Campo:</label>
+                    <label><i data-lucide="map-pin"></i>Campo:</label>
                     <input type="text" id="matchVenue" placeholder="Nombre del campo">
                 </div>
                 <div class="detail-item">
-                    <label>Rival:</label>
+                    <label><i data-lucide="users"></i>Rival:</label>
                     <input type="text" id="rivalName" placeholder="Nombre del rival">
                 </div>
                 <div class="detail-item">
-                    <label>Local/Visitante:</label>
+                    <label><i data-lucide="home"></i>Local/Visitante:</label>
                     <select id="homeAway">
                         <option value="local">Local</option>
                         <option value="visitante">Visitante</option>
                     </select>
                 </div>
                 <div class="detail-item">
-                    <label>Categoría:</label>
+                    <label><i data-lucide="trophy"></i>Categoría:</label>
                     <input type="text" id="category" value="ALEVIN B F11" readonly>
                 </div>
                 <div class="detail-item">
-                    <label>Jornada:</label>
+                    <label><i data-lucide="hash"></i>Jornada:</label>
                     <select id="matchDay">
                         <option value="">Seleccionar jornada</option>
                         <option value="1">Jornada 1</option>
@@ -103,43 +129,43 @@
 
         <!-- Controles del partido -->
         <div class="match-controls">
-            <button id="startMatch" class="control-btn start">Iniciar Partido</button>
-            <button id="endFirstHalf" class="control-btn pause" disabled>Final 1º Tiempo</button>
-            <button id="startSecondHalf" class="control-btn start" disabled>Inicio 2º Tiempo</button>
-            <button id="endMatch" class="control-btn end" disabled>Final Partido</button>
-            <button id="exportPDF" class="control-btn export" disabled>📄 Exportar PDF</button>
-            <button id="newMatch" class="control-btn new">🆕 Nuevo Partido</button>
+            <button id="startMatch" class="control-btn start"><i data-lucide="play"></i>Iniciar Partido</button>
+            <button id="endFirstHalf" class="control-btn pause" disabled><i data-lucide="pause"></i>Final 1º Tiempo</button>
+            <button id="startSecondHalf" class="control-btn start" disabled><i data-lucide="play"></i>Inicio 2º Tiempo</button>
+            <button id="endMatch" class="control-btn end" disabled><i data-lucide="square"></i>Final Partido</button>
+            <button id="exportPDF" class="control-btn export" disabled><i data-lucide="download"></i>Exportar PDF</button>
+            <button id="newMatch" class="control-btn new"><i data-lucide="plus-circle"></i>Nuevo Partido</button>
         </div>
         
         <!-- Controles de goles -->
         <div class="goal-controls">
             <div class="goal-control-group">
-                <label>Goles Atlético:</label>
+                <label><i data-lucide="target"></i>Goles Atlético:</label>
                 <div class="goal-buttons">
-                    <button id="addHomeGoal" class="goal-btn add">+ Gol</button>
+                    <button id="addHomeGoal" class="goal-btn add"><i data-lucide="plus"></i>Gol</button>
                     <span id="homeGoalDisplay" class="goal-display">0</span>
-                    <button id="removeHomeGoal" class="goal-btn remove">- Gol</button>
+                    <button id="removeHomeGoal" class="goal-btn remove"><i data-lucide="minus"></i>Gol</button>
                 </div>
             </div>
             <div class="goal-control-group">
-                <label>Goles Rival:</label>
+                <label><i data-lucide="target"></i>Goles Rival:</label>
                 <div class="goal-buttons">
-                    <button id="addAwayGoal" class="goal-btn add">+ Gol</button>
+                    <button id="addAwayGoal" class="goal-btn add"><i data-lucide="plus"></i>Gol</button>
                     <span id="awayGoalDisplay" class="goal-display">0</span>
-                    <button id="removeAwayGoal" class="goal-btn remove">- Gol</button>
+                    <button id="removeAwayGoal" class="goal-btn remove"><i data-lucide="minus"></i>Gol</button>
                 </div>
             </div>
         </div>
 
         <!-- Gestión de jugadores (arriba del campo) -->
         <div class="players-management">
-            <h3>Gestión de Jugadores</h3>
+            <h3><i data-lucide="users"></i>Gestión de Jugadores</h3>
             <div class="management-tabs">
-                <button id="loadDefaultPlayersBtn" class="tab-btn active">Cargar Plantilla Base</button>
-                <button id="selectStartersBtn" class="tab-btn">Elegir Titulares (11)</button>
-                <button id="addCustomPlayerBtn" class="tab-btn">Añadir Jugador</button>
-                <button id="editPlayerBtn" class="tab-btn">Editar Jugador</button>
-                <button id="uncalledPlayersBtn" class="tab-btn">Desconvocados</button>
+                <button id="loadDefaultPlayersBtn" class="tab-btn active"><i data-lucide="user-check"></i>Cargar Plantilla Base</button>
+                <button id="selectStartersBtn" class="tab-btn"><i data-lucide="users"></i>Elegir Titulares (11)</button>
+                <button id="addCustomPlayerBtn" class="tab-btn"><i data-lucide="user-plus"></i>Añadir Jugador</button>
+                <button id="editPlayerBtn" class="tab-btn"><i data-lucide="edit"></i>Editar Jugador</button>
+                <button id="uncalledPlayersBtn" class="tab-btn"><i data-lucide="user-x"></i>Desconvocados</button>
             </div>
             
             <!-- Selector de titulares -->
@@ -262,7 +288,7 @@
         <div class="bottom-section">
             <!-- Panel de jugadores suplentes -->
             <div class="substitutes-panel">
-                <h3>Suplentes</h3>
+                <h3><i data-lucide="user-check"></i>Suplentes</h3>
                 <div id="substitutesList" class="substitutes-list">
                     <!-- Los suplentes se generarán dinámicamente -->
                 </div>
@@ -270,7 +296,7 @@
 
             <!-- Cronología del partido -->
             <div class="match-timeline">
-                <h3>Cronología del Partido</h3>
+                <h3><i data-lucide="clock"></i>Cronología del Partido</h3>
                 <div id="timelineEvents" class="timeline-events">
                     <!-- Los eventos se generarán dinámicamente -->
                 </div>
@@ -298,7 +324,7 @@
     <!-- Modal de gol -->
     <div id="goalModal" class="modal">
         <div class="modal-content">
-            <h3 id="goalModalTitle">Registrar Gol</h3>
+            <h3 id="goalModalTitle"><i data-lucide="target"></i>Registrar Gol</h3>
             <div class="goal-form">
                 <label>Goleador:</label>
                 <select id="goalScorer"></select>
@@ -334,6 +360,45 @@
         </div>
     </div>
 
+    <!-- Modal de edición de gol -->
+    <div id="editGoalModal" class="modal">
+        <div class="modal-content">
+            <h3 id="editGoalModalTitle"><i data-lucide="edit"></i>Editar Gol</h3>
+            <div class="goal-form">
+                <label>Nuevo Goleador:</label>
+                <select id="editGoalScorer"></select>
+                
+                <label>Tipo de gol:</label>
+                <select id="editGoalType">
+                    <option value="pie-derecho">Pie derecho</option>
+                    <option value="pie-izquierdo">Pie izquierdo</option>
+                    <option value="cabeza">De cabeza</option>
+                    <option value="frontal">Desde el frontal</option>
+                    <option value="corner">De corner</option>
+                    <option value="abp">A balón parado</option>
+                    <option value="penalty">Penalti</option>
+                    <option value="volea">De volea</option>
+                    <option value="chilena">Chilena</option>
+                    <option value="taconazo">Taconazo</option>
+                    <option value="rebote">De rebote</option>
+                    <option value="contragolpe">Contragolpe</option>
+                    <option value="jugada-personal">Jugada personal</option>
+                    <option value="own-goal">Gol en propia</option>
+                </select>
+                
+                <label>Asistencia (opcional):</label>
+                <select id="editGoalAssist">
+                    <option value="">Sin asistencia</option>
+                </select>
+                
+                <div class="modal-buttons">
+                    <button id="confirmEditGoal" class="confirm-btn">Guardar Cambios</button>
+                    <button id="cancelEditGoal" class="cancel-btn">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de cambio -->
     <div id="substitutionModal" class="modal">
         <div class="modal-content">
@@ -356,7 +421,7 @@
     <!-- Modal de tarjeta -->
     <div id="cardModal" class="modal">
         <div class="modal-content">
-            <h3 id="cardModalTitle">Tarjeta</h3>
+            <h3 id="cardModalTitle"><i data-lucide="card"></i>Tarjeta</h3>
             <div class="card-form">
                 <label>Jugador:</label>
                 <select id="cardPlayer"></select>
@@ -411,5 +476,9 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Inicializar iconos Lucide
+        lucide.createIcons();
+    </script>
 </body>
 </html>

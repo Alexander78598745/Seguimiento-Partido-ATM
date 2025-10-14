@@ -197,6 +197,10 @@ class MatchAnalyzer {
             // Modal de gol
             document.getElementById('confirmGoal').addEventListener('click', () => this.confirmGoal());
             document.getElementById('cancelGoal').addEventListener('click', () => this.closeModal('goalModal'));
+            
+            // Modal de edición de gol
+            document.getElementById('confirmEditGoal').addEventListener('click', () => this.confirmEditGoal());
+            document.getElementById('cancelEditGoal').addEventListener('click', () => this.closeModal('editGoalModal'));
 
             // Modal de cambio
             document.getElementById('confirmSubstitution').addEventListener('click', () => this.confirmSubstitution());
@@ -2277,11 +2281,28 @@ class MatchAnalyzer {
                 eventElement.dataset.eventId = event.id || index;
                 
                 // CRÍTICO: Estructura HTML limpia sin emojis problemáticos
+                // Hacer eventos de gol editables
+                const isGoalEvent = event.type === 'goal_home' || event.type === 'goal_away';
+                const editableClass = isGoalEvent ? ' editable-goal' : '';
+                
                 eventElement.innerHTML = `
-                    <div class="event-description">
+                    <div class="event-description${editableClass}">
                         <span class="event-text">${event.description || 'Evento sin descripción'}</span>
+                        ${isGoalEvent ? `<button class="edit-goal-btn" data-event-id="${event.id}">✏️</button>` : ''}
                     </div>
                 `;
+                
+                // Agregar event listener para el botón de edición
+                if (isGoalEvent) {
+                    const editBtn = eventElement.querySelector('.edit-goal-btn');
+                    if (editBtn) {
+                        editBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.editGoalEvent(event.id);
+                        });
+                    }
+                }
                 
                 container.appendChild(eventElement);
                 console.log(`✓ Evento ${index + 1} renderizado:`, event.description);
@@ -2308,6 +2329,11 @@ class MatchAnalyzer {
             console.error(`INCONSISTENCIA: Se esperaban ${sortedEvents.length} eventos pero solo se renderizaron ${finalCount}`);
         } else {
             console.log('✓ Cronología renderizada completamente');
+        }
+        
+        // Reinicializar iconos Lucide después de actualizar el contenido
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     }
 
@@ -2815,11 +2841,171 @@ class MatchAnalyzer {
         matches.push(matchInfo);
         localStorage.setItem('atletico_base_matches', JSON.stringify(matches));
     }
+
+    // NUEVA FUNCIONALIDAD: Editar eventos de gol
+    editGoalEvent(eventId) {
+        console.log('=== EDITANDO EVENTO DE GOL ===');
+        console.log('ID del evento:', eventId);
+        
+        // Buscar el evento en la lista
+        const event = this.matchData.events.find(e => e.id == eventId);
+        if (!event) {
+            console.error('Evento no encontrado:', eventId);
+            alert('Error: No se pudo encontrar el evento de gol');
+            return;
+        }
+        
+        if (event.type !== 'goal_home' && event.type !== 'goal_away') {
+            console.error('El evento no es un gol:', event.type);
+            alert('Error: Este evento no es un gol');
+            return;
+        }
+        
+        console.log('Evento encontrado:', event);
+        
+        // Guardar referencia del evento a editar
+        this.editingGoalEvent = event;
+        
+        // Abrir modal de edición
+        this.openEditGoalModal(event);
+    }
+    
+    openEditGoalModal(event) {
+        console.log('=== ABRIENDO MODAL DE EDICIÓN DE GOL ===');
+        
+        const modal = document.getElementById('editGoalModal');
+        const title = document.getElementById('editGoalModalTitle');
+        const goalScorer = document.getElementById('editGoalScorer');
+        const goalType = document.getElementById('editGoalType');
+        const goalAssist = document.getElementById('editGoalAssist');
+        
+        if (!modal || !title || !goalScorer || !goalType || !goalAssist) {
+            console.error('ERROR: Elementos del modal de edición no encontrados');
+            alert('Error: Modal de edición no disponible');
+            return;
+        }
+        
+        // Configurar título
+        const isHomeGoal = event.type === 'goal_home';
+        title.textContent = isHomeGoal ? 'Editar Gol del Atlético' : 'Editar Gol del Rival';
+        
+        // Limpiar selects
+        goalScorer.innerHTML = '';
+        goalAssist.innerHTML = '<option value="">Sin asistencia</option>';
+        
+        if (isHomeGoal) {
+            // Para goles del Atlético, mostrar TODOS los jugadores (titulares y suplentes)
+            const playersOnField = this.players;
+            
+            playersOnField.forEach(player => {
+                const option = document.createElement('option');
+                option.value = player.id;
+                option.textContent = `${player.number} - ${player.alias}`;
+                goalScorer.appendChild(option);
+                
+                // También agregar a asistencias
+                const assistOption = document.createElement('option');
+                assistOption.value = player.id;
+                assistOption.textContent = `${player.number} - ${player.alias}`;
+                goalAssist.appendChild(assistOption);
+            });
+        } else {
+            // Para goles del rival
+            const rivalName = document.getElementById('rivalName').value || 'RIVAL';
+            const option = document.createElement('option');
+            option.value = 'rival';
+            option.textContent = rivalName.toUpperCase();
+            goalScorer.appendChild(option);
+        }
+        
+        // Intentar seleccionar valores actuales basados en la descripción
+        // (Esto es una aproximación ya que no guardamos IDs en la descripción original)
+        console.log('✓ Modal de edición configurado');
+        
+        // Mostrar modal
+        modal.style.display = 'block';
+    }
+    
+    confirmEditGoal() {
+        console.log('=== CONFIRMANDO EDICIÓN DE GOL ===');
+        
+        if (!this.editingGoalEvent) {
+            console.error('No hay evento de gol para editar');
+            alert('Error: No hay evento de gol seleccionado');
+            return;
+        }
+        
+        const scorerId = document.getElementById('editGoalScorer').value;
+        const goalType = document.getElementById('editGoalType').value;
+        const assistId = document.getElementById('editGoalAssist').value;
+        
+        if (!scorerId) {
+            alert('Selecciona el nuevo goleador');
+            return;
+        }
+        
+        console.log('Nuevo goleador ID:', scorerId);
+        console.log('Tipo de gol:', goalType);
+        console.log('Asistencia ID:', assistId);
+        
+        // Obtener información del nuevo goleador
+        let newScorer = null;
+        let newDescription = '';
+        const currentMinute = this.editingGoalEvent.minute;
+        const isHomeGoal = this.editingGoalEvent.type === 'goal_home';
+        
+        if (isHomeGoal && scorerId !== 'rival') {
+            newScorer = this.players.find(p => p.id == scorerId);
+            if (!newScorer) {
+                console.error('Jugador no encontrado');
+                alert('Error: Jugador no encontrado');
+                return;
+            }
+            
+            // Construir nueva descripción
+            newDescription = `${currentMinute.toString().padStart(2, '0')}' - GOL DE ${newScorer.alias}`;
+            
+            // Agregar asistencia si existe
+            if (assistId) {
+                const assist = this.players.find(p => p.id == assistId);
+                if (assist) {
+                    newDescription += ` (Asistencia: ${assist.alias})`;
+                }
+            }
+            
+            // Agregar tipo de gol
+            newDescription += ` - ${this.getGoalTypeName(goalType)}`;
+            
+        } else {
+            // Gol del rival
+            const rivalName = document.getElementById('rivalName').value || 'RIVAL';
+            newDescription = `${currentMinute.toString().padStart(2, '0')}' - GOL DE ${rivalName.toUpperCase()}`;
+        }
+        
+        console.log('Nueva descripción:', newDescription);
+        
+        // Actualizar el evento
+        this.editingGoalEvent.description = newDescription;
+        
+        console.log('✓ Evento actualizado exitosamente');
+        
+        // Actualizar cronología
+        this.updateTimelineDisplay();
+        
+        // Cerrar modal y limpiar
+        this.closeModal('editGoalModal');
+        this.editingGoalEvent = null;
+        
+        console.log('✓ Edición de gol completada');
+        alert('Gol editado exitosamente');
+    }
 }
 
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', () => {
     window.matchAnalyzer = new MatchAnalyzer();
+    // Referencia global adicional para compatibilidad
+    window.app = window.matchAnalyzer;
 });
 
 // Service Worker

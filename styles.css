@@ -10,6 +10,183 @@
     --defender-color: #2196F3;
     --midfielder-color: #4CAF50;
     --forward-color: #FF5722;
+    
+    /* Sombras modernas */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1);
+    
+    /* Bordes redondeados */
+    --border-radius-sm: 6px;
+    --border-radius-md: 10px;
+    --border-radius-lg: 16px;
+    --border-radius-xl: 24px;
+    
+    /* Transiciones suaves */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Gradiente para hero header */
+    --gradient-hero: linear-gradient(135deg, var(--atletico-red), var(--atletico-blue));
+    
+    /* Colores adicionales */
+    --bg-white: #ffffff;
+    --bg-light: #f8f9fa;
+    --text-primary: #2c3e50;
+    --text-secondary: #6c757d;
+}
+
+/* Hero Header con escudo y degradado */
+.hero-header {
+    position: relative;
+    margin-bottom: 24px;
+    border-radius: var(--border-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+}
+
+.header-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-hero);
+    opacity: 0.95;
+}
+
+.header-content {
+    position: relative;
+    z-index: 2;
+    padding: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--atletico-white);
+}
+
+.club-identity {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.club-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid var(--atletico-white);
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--transition-normal);
+}
+
+.club-logo:hover {
+    transform: scale(1.05);
+}
+
+.club-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.club-name {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.club-motto {
+    font-size: 14px;
+    font-weight: 300;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.app-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+.app-title i {
+    width: 24px;
+    height: 24px;
+}
+
+.app-title-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.app-version {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+/* Estilos para botón de edición de goles */
+.edit-goal-btn {
+    background: var(--atletico-red);
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 12px;
+    transition: background 0.3s;
+}
+
+.edit-goal-btn:hover {
+    background: #b31e27;
+}
+
+.editable-goal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Estilos para iconos Lucide */
+[data-lucide] {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* Iconos en botones */
+button [data-lucide] {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+/* Iconos en títulos */
+h3 [data-lucide] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    color: var(--atletico-red);
+}
+
+/* Iconos en labels */
+label [data-lucide] {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    color: var(--atletico-blue);
 }
 
 /* Reset y configuración base */
@@ -20,7 +197,7 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--atletico-red), var(--atletico-blue));
     min-height: 100vh;
     color: var(--atletico-white);
@@ -36,10 +213,11 @@ body {
 .match-header {
     background: rgba(255, 255, 255, 0.95);
     color: var(--atletico-blue);
-    border-radius: 15px;
+    border-radius: var(--border-radius-lg);
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-normal);
 }
 
 .team-info {
@@ -144,12 +322,15 @@ body {
 .control-btn {
     padding: 15px 30px;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--border-radius-md);
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .control-btn.start {
@@ -195,8 +376,9 @@ body {
     margin-bottom: 20px;
     padding: 20px;
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
 }
 
 .goal-control-group {
@@ -221,12 +403,16 @@ body {
 .goal-btn {
     padding: 10px 15px;
     border: none;
-    border-radius: 8px;
+    border-radius: var(--border-radius-sm);
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: var(--transition-normal);
     font-size: 14px;
     min-width: 60px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: var(--shadow-sm);
 }
 
 .goal-btn.add {
@@ -241,7 +427,7 @@ body {
 
 .goal-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .goal-display {
@@ -263,10 +449,11 @@ body {
 .players-management {
     background: rgba(255, 255, 255, 0.95);
     color: var(--atletico-blue);
-    border-radius: 15px;
+    border-radius: var(--border-radius-lg);
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-normal);
 }
 
 .players-management h3 {
@@ -290,7 +477,11 @@ body {
     font-weight: bold;
     cursor: pointer;
     border-bottom: 3px solid transparent;
-    transition: all 0.3s;
+    transition: var(--transition-normal);
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .tab-btn.active {
@@ -1236,13 +1427,14 @@ body {
     transform: translate(-50%, -50%);
     background: white;
     color: var(--atletico-blue);
-    border-radius: 15px;
+    border-radius: var(--border-radius-lg);
     padding: 30px;
     max-width: 500px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-xl);
+    transition: var(--transition-normal);
 }
 
 .modal-content h3 {
