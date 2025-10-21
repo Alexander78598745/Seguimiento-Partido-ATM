@@ -56,6 +56,11 @@ class MatchAnalyzer {
     }
 
     init() {
+        console.log('=== INICIANDO MATCHANALYZER ===');
+        
+        // Verificar elementos críticos antes de continuar
+        this.verifyElements();
+        
         // CRÍTICO: Limpiar localStorage para evitar jugadores predeterminados
         this.clearPredeterminedPlayers();
         
@@ -80,6 +85,41 @@ class MatchAnalyzer {
         }
     }
 
+    verifyElements() {
+        console.log('=== VERIFICANDO ELEMENTOS CRÍTICOS ===');
+        
+        const criticalElements = [
+            'saveFollowUp',
+            'loadFollowUp', 
+            'saveFollowUpModal',
+            'loadFollowUpModal',
+            'followUpName',
+            'savedFollowUpsList',
+            'confirmSaveFollowUp',
+            'cancelSaveFollowUp',
+            'cancelLoadFollowUp'
+        ];
+        
+        let missingElements = [];
+        
+        criticalElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                console.log(`✅ Elemento encontrado: ${id}`);
+            } else {
+                console.error(`❌ Elemento faltante: ${id}`);
+                missingElements.push(id);
+            }
+        });
+        
+        if (missingElements.length > 0) {
+            console.error('❌ ELEMENTOS FALTANTES:', missingElements);
+            alert(`ERROR: Faltan elementos en el HTML: ${missingElements.join(', ')}`);
+        } else {
+            console.log('✅ Todos los elementos críticos encontrados');
+        }
+    }
+
     setupEventListeners() {
         // Controles del partido
         document.getElementById('startMatch').addEventListener('click', () => this.startMatch());
@@ -87,6 +127,31 @@ class MatchAnalyzer {
         document.getElementById('startSecondHalf').addEventListener('click', () => this.startSecondHalf());
         document.getElementById('endMatch').addEventListener('click', () => this.endMatch());
         document.getElementById('exportPDF').addEventListener('click', () => this.exportToPDF());
+        
+        // Nuevos botones de seguimiento
+        const saveBtn = document.getElementById('saveFollowUp');
+        const loadBtn = document.getElementById('loadFollowUp');
+        
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                console.log('Botón Guardar Seguimiento clickeado');
+                this.showSaveFollowUpModal();
+            });
+            console.log('✅ Event listener para Guardar Seguimiento configurado');
+        } else {
+            console.error('❌ No se encontró el botón saveFollowUp');
+        }
+        
+        if (loadBtn) {
+            loadBtn.addEventListener('click', () => {
+                console.log('Botón Cargar Seguimiento clickeado');
+                this.showLoadFollowUpModal();
+            });
+            console.log('✅ Event listener para Cargar Seguimiento configurado');
+        } else {
+            console.error('❌ No se encontró el botón loadFollowUp');
+        }
+        
         document.getElementById('newMatch').addEventListener('click', () => this.newMatch());
 
         // Controles de goles
@@ -213,6 +278,34 @@ class MatchAnalyzer {
             // Modal de tarjeta amarilla rival
             document.getElementById('confirmRivalCard').addEventListener('click', () => this.confirmRivalCard());
             document.getElementById('cancelRivalCard').addEventListener('click', () => this.closeModal('rivalCardModal'));
+
+            // Modal de guardar seguimiento
+            const confirmSaveBtn = document.getElementById('confirmSaveFollowUp');
+            const cancelSaveBtn = document.getElementById('cancelSaveFollowUp');
+            
+            if (confirmSaveBtn) {
+                confirmSaveBtn.addEventListener('click', () => this.confirmSaveFollowUp());
+                console.log('✅ Event listener para confirmSaveFollowUp configurado');
+            } else {
+                console.error('❌ No se encontró el botón confirmSaveFollowUp');
+            }
+            
+            if (cancelSaveBtn) {
+                cancelSaveBtn.addEventListener('click', () => this.closeModal('saveFollowUpModal'));
+                console.log('✅ Event listener para cancelSaveFollowUp configurado');
+            } else {
+                console.error('❌ No se encontró el botón cancelSaveFollowUp');
+            }
+
+            // Modal de cargar seguimiento
+            const cancelLoadBtn = document.getElementById('cancelLoadFollowUp');
+            
+            if (cancelLoadBtn) {
+                cancelLoadBtn.addEventListener('click', () => this.closeModal('loadFollowUpModal'));
+                console.log('✅ Event listener para cancelLoadFollowUp configurado');
+            } else {
+                console.error('❌ No se encontró el botón cancelLoadFollowUp');
+            }
 
             // Cerrar otros modales al hacer clic fuera
             document.querySelectorAll('.modal').forEach(modal => {
@@ -351,6 +444,7 @@ class MatchAnalyzer {
                 player.isUncalled = false;
                 player.previousMinutes = 0; // Para fútbol base
                 player.enteredDuringHalftime = false; // Reset marca de descanso
+                player.yellowCards = 0; // Reset tarjetas amarillas
             });
 
             // Reset de interfaz
@@ -638,6 +732,7 @@ class MatchAnalyzer {
             minutesPlayed: 0,
             entryMinute: null,
             exitMinute: null,
+            yellowCards: 0,          // Inicializar tarjetas amarillas
             x: 50,  // Posición neutral
             y: 50   // Posición neutral
         }));
@@ -1019,6 +1114,7 @@ class MatchAnalyzer {
             minutesPlayed: 0,
             entryMinute: null,
             exitMinute: null,
+            yellowCards: 0,
             x: this.getDefaultPosition(position).x,
             y: this.getDefaultPosition(position).y
         };
@@ -1106,6 +1202,10 @@ class MatchAnalyzer {
             <div class="number">${player.number}</div>
             <div class="name">${player.alias}</div>
             <div class="minutes">${player.minutesPlayed || 0}'</div>
+            ${player.yellowCards && player.yellowCards > 0 ? 
+                `<div class="yellow-card-icon" title="Tarjetas amarillas: ${player.yellowCards}">🟨</div>` : 
+                ''
+            }
         `;
 
         this.makeDraggable(div, player);
@@ -2016,6 +2116,13 @@ class MatchAnalyzer {
         const currentMinute = this.matchData.isRunning ? Math.floor(this.matchData.currentTime / 60) : 0;
         const description = `${currentMinute.toString().padStart(2, '0')}' - TARJETA ${cardType === 'yellow' ? 'AMARILLA' : 'ROJA'} - ${player.alias}${reason ? ` - ${reason}` : ''}`;
 
+        // Registrar tarjeta en el jugador
+        if (cardType === 'yellow') {
+            if (!player.yellowCards) player.yellowCards = 0;
+            player.yellowCards++;
+            console.log(`✓ Tarjeta amarilla registrada para ${player.alias}. Total: ${player.yellowCards}`);
+        }
+
         // Agregar a cronología
         this.addTimelineEvent(cardType === 'yellow' ? 'card_yellow' : 'card_red', description, '');
 
@@ -2036,6 +2143,9 @@ class MatchAnalyzer {
         }
 
         console.log('✓ Tarjeta registrada en cronología:', description);
+        
+        // Renderizar jugadores para mostrar cambios visuales (como iconos de tarjetas)
+        this.renderPlayers();
         
         this.closeModal('cardModal');
         this.selectedPlayer = null;
@@ -2999,6 +3109,273 @@ class MatchAnalyzer {
         console.log('✓ Edición de gol completada');
         alert('Gol editado exitosamente');
     }
+
+    // ========== NUEVAS FUNCIONES PARA SEGUIMIENTOS ==========
+    
+    // Mostrar modal para guardar seguimiento
+    showSaveFollowUpModal() {
+        console.log('=== FUNCIÓN showSaveFollowUpModal EJECUTADA ===');
+        
+        // Limpiar input del nombre
+        const nameInput = document.getElementById('followUpName');
+        if (!nameInput) {
+            console.error('❌ No se encontró el elemento followUpName');
+            return;
+        }
+        nameInput.value = '';
+        
+        // Sugerir un nombre automático basado en la información del partido
+        const rival = document.getElementById('rivalName').value || 'Rival';
+        const jornada = document.getElementById('matchDay').value;
+        const date = document.getElementById('matchDate').value;
+        
+        let suggestedName = `vs ${rival}`;
+        if (jornada) suggestedName += ` - Jornada ${jornada}`;
+        if (date) suggestedName += ` (${date})`;
+        
+        nameInput.value = suggestedName;
+        console.log('Nombre sugerido:', suggestedName);
+        
+        const modal = document.getElementById('saveFollowUpModal');
+        if (!modal) {
+            console.error('❌ No se encontró el modal saveFollowUpModal');
+            return;
+        }
+        
+        modal.style.display = 'block';
+        console.log('✅ Modal de guardar mostrado exitosamente');
+    }
+    
+    // Confirmar guardado de seguimiento
+    confirmSaveFollowUp() {
+        const name = document.getElementById('followUpName').value.trim();
+        
+        if (!name) {
+            alert('Por favor, introduce un nombre para el seguimiento.');
+            return;
+        }
+        
+        // Crear objeto con todos los datos del seguimiento
+        const followUpData = {
+            id: Date.now().toString(),
+            name: name,
+            matchData: { ...this.matchData },
+            players: this.players.map(player => ({ ...player })),
+            matchInfo: {
+                date: document.getElementById('matchDate').value,
+                venue: document.getElementById('matchVenue').value,
+                rival: document.getElementById('rivalName').value,
+                homeAway: document.getElementById('homeAway').value,
+                category: document.getElementById('category').value,
+                matchDay: document.getElementById('matchDay').value
+            },
+            savedAt: new Date().toISOString()
+        };
+        
+        // Guardar en localStorage
+        this.saveFollowUpToStorage(followUpData);
+        
+        this.closeModal('saveFollowUpModal');
+        alert(`Seguimiento "${name}" guardado exitosamente.`);
+    }
+    
+    // Guardar seguimiento en localStorage
+    saveFollowUpToStorage(followUpData) {
+        const savedFollowUps = JSON.parse(localStorage.getItem('atletico_followups')) || [];
+        savedFollowUps.push(followUpData);
+        localStorage.setItem('atletico_followups', JSON.stringify(savedFollowUps));
+    }
+    
+    // Mostrar modal para cargar seguimiento
+    showLoadFollowUpModal() {
+        console.log('=== FUNCIÓN showLoadFollowUpModal EJECUTADA ===');
+        
+        this.renderSavedFollowUps();
+        
+        const modal = document.getElementById('loadFollowUpModal');
+        if (!modal) {
+            console.error('❌ No se encontró el modal loadFollowUpModal');
+            return;
+        }
+        
+        modal.style.display = 'block';
+        console.log('✅ Modal de cargar mostrado exitosamente');
+    }
+    
+    // Renderizar lista de seguimientos guardados
+    renderSavedFollowUps() {
+        const savedFollowUps = JSON.parse(localStorage.getItem('atletico_followups')) || [];
+        const container = document.getElementById('savedFollowUpsList');
+        
+        if (savedFollowUps.length === 0) {
+            container.innerHTML = '<div class="no-followups">No hay seguimientos guardados.</div>';
+            return;
+        }
+        
+        container.innerHTML = savedFollowUps.map(followUp => {
+            const date = new Date(followUp.savedAt);
+            const formattedDate = date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            return `
+                <div class="followup-item">
+                    <div class="followup-info">
+                        <div class="followup-name">${followUp.name}</div>
+                        <div class="followup-details">
+                            Guardado: ${formattedDate} | 
+                            Resultado: ${followUp.matchData.homeScore}-${followUp.matchData.awayScore} | 
+                            Eventos: ${followUp.matchData.events.length}
+                        </div>
+                    </div>
+                    <div class="followup-actions">
+                        <button class="followup-btn load" onclick="window.matchAnalyzer.loadFollowUp('${followUp.id}')">
+                            Cargar
+                        </button>
+                        <button class="followup-btn delete" onclick="window.matchAnalyzer.deleteFollowUp('${followUp.id}')">
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    // Cargar seguimiento específico
+    loadFollowUp(followUpId) {
+        const savedFollowUps = JSON.parse(localStorage.getItem('atletico_followups')) || [];
+        const followUp = savedFollowUps.find(f => f.id === followUpId);
+        
+        if (!followUp) {
+            alert('Seguimiento no encontrado.');
+            return;
+        }
+        
+        // Confirmar carga
+        if (!confirm(`¿Estás seguro de que quieres cargar el seguimiento "${followUp.name}"? Se perderán los datos actuales no guardados.`)) {
+            return;
+        }
+        
+        // Restaurar todos los datos
+        this.matchData = { ...followUp.matchData };
+        this.players = followUp.players.map(player => ({ ...player }));
+        
+        // Restaurar información del partido
+        document.getElementById('matchDate').value = followUp.matchInfo.date || '';
+        document.getElementById('matchVenue').value = followUp.matchInfo.venue || '';
+        document.getElementById('rivalName').value = followUp.matchInfo.rival || '';
+        document.getElementById('homeAway').value = followUp.matchInfo.homeAway || 'local';
+        document.getElementById('category').value = followUp.matchInfo.category || 'ALEVIN B F11';
+        document.getElementById('matchDay').value = followUp.matchInfo.matchDay || '';
+        
+        // Actualizar pantalla
+        this.updateMatchDisplay();
+        this.renderPlayers();
+        this.updateTimelineDisplay();
+        this.updateGoalDisplays();
+        this.updateMatchControls();
+        
+        // Actualizar nombre del rival en header
+        document.getElementById('awayTeamName').textContent = followUp.matchInfo.rival || 'RIVAL';
+        
+        this.closeModal('loadFollowUpModal');
+        alert(`Seguimiento "${followUp.name}" cargado exitosamente.`);
+    }
+    
+    // Eliminar seguimiento
+    deleteFollowUp(followUpId) {
+        const savedFollowUps = JSON.parse(localStorage.getItem('atletico_followups')) || [];
+        const followUp = savedFollowUps.find(f => f.id === followUpId);
+        
+        if (!followUp) {
+            alert('Seguimiento no encontrado.');
+            return;
+        }
+        
+        if (!confirm(`¿Estás seguro de que quieres eliminar el seguimiento "${followUp.name}"?`)) {
+            return;
+        }
+        
+        const updatedFollowUps = savedFollowUps.filter(f => f.id !== followUpId);
+        localStorage.setItem('atletico_followups', JSON.stringify(updatedFollowUps));
+        
+        // Volver a renderizar la lista
+        this.renderSavedFollowUps();
+        
+        alert(`Seguimiento "${followUp.name}" eliminado exitosamente.`);
+    }
+    
+    // Actualizar controles del partido según el estado
+    updateMatchControls() {
+        const buttons = {
+            startMatch: document.getElementById('startMatch'),
+            endFirstHalf: document.getElementById('endFirstHalf'),
+            startSecondHalf: document.getElementById('startSecondHalf'),
+            endMatch: document.getElementById('endMatch'),
+            exportPDF: document.getElementById('exportPDF')
+        };
+        
+        // Resetear todos los botones
+        Object.values(buttons).forEach(btn => {
+            btn.disabled = false;
+        });
+        
+        // Aplicar estado según el período del partido
+        switch (this.matchData.period) {
+            case 'pre':
+                buttons.endFirstHalf.disabled = true;
+                buttons.startSecondHalf.disabled = true;
+                buttons.endMatch.disabled = true;
+                buttons.exportPDF.disabled = true;
+                break;
+            case 'first':
+                buttons.startMatch.disabled = true;
+                buttons.startSecondHalf.disabled = true;
+                buttons.endMatch.disabled = true;
+                buttons.exportPDF.disabled = true;
+                break;
+            case 'halftime':
+                buttons.startMatch.disabled = true;
+                buttons.endFirstHalf.disabled = true;
+                buttons.endMatch.disabled = true;
+                buttons.exportPDF.disabled = true;
+                break;
+            case 'second':
+                buttons.startMatch.disabled = true;
+                buttons.endFirstHalf.disabled = true;
+                buttons.startSecondHalf.disabled = true;
+                break;
+            case 'finished':
+                buttons.startMatch.disabled = true;
+                buttons.endFirstHalf.disabled = true;
+                buttons.startSecondHalf.disabled = true;
+                buttons.endMatch.disabled = true;
+                break;
+        }
+    }
+    
+    // Actualizar display del partido
+    updateMatchDisplay() {
+        // Actualizar marcador
+        document.getElementById('homeScore').textContent = this.matchData.homeScore;
+        document.getElementById('awayScore').textContent = this.matchData.awayScore;
+        
+        // Actualizar período
+        const periodTexts = {
+            'pre': 'Pre-partido',
+            'first': '1º Tiempo',
+            'halftime': 'Descanso',
+            'second': '2º Tiempo',
+            'finished': 'Finalizado'
+        };
+        document.getElementById('matchPeriod').textContent = periodTexts[this.matchData.period] || 'Pre-partido';
+        
+        // Actualizar cronómetro
+        const minutes = Math.floor(this.matchData.currentTime / 60);
+        const seconds = this.matchData.currentTime % 60;
+        document.getElementById('matchTimer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // ========== FIN NUEVAS FUNCIONES PARA SEGUIMIENTOS ==========
 }
 
 // Inicializar aplicación

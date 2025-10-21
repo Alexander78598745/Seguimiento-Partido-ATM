@@ -353,6 +353,16 @@ body {
     color: white;
 }
 
+.control-btn.save {
+    background: #28a745;
+    color: white;
+}
+
+.control-btn.load {
+    background: #17a2b8;
+    color: white;
+}
+
 .control-btn.new {
     background: var(--field-green);
     color: white;
@@ -1772,4 +1782,140 @@ body {
     .uncalled-players-management {
         grid-template-columns: 1fr;
     }
+}
+
+/* Estilos para los modales de seguimiento */
+.save-followup-form,
+.load-followup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.save-followup-form label,
+.load-followup-form label {
+    font-weight: bold;
+    color: var(--atletico-red);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.save-followup-form input {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.save-followup-form input:focus {
+    outline: none;
+    border-color: var(--atletico-red);
+}
+
+.saved-followups-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background: #f8f9fa;
+}
+
+.followup-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.followup-item:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.followup-info {
+    flex-grow: 1;
+}
+
+.followup-name {
+    font-weight: bold;
+    color: var(--atletico-red);
+    margin-bottom: 4px;
+}
+
+.followup-details {
+    font-size: 12px;
+    color: #666;
+}
+
+.followup-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.followup-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+}
+
+.followup-btn.load {
+    background: #17a2b8;
+    color: white;
+}
+
+.followup-btn.delete {
+    background: #dc3545;
+    color: white;
+}
+
+.followup-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.no-followups {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Icono de tarjeta amarilla para jugadores */
+.yellow-card-icon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    border-radius: 2px;
+    width: 14px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid #CC8400;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 15;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.yellow-card-icon:hover {
+    background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    transform: scale(1.15);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
 }
