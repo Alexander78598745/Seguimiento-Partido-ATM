@@ -154,6 +154,7 @@ class MatchAnalyzer {
         
         document.getElementById('newMatch').addEventListener('click', () => this.newMatch());
 
+
         // Controles de goles
         document.getElementById('addHomeGoal').addEventListener('click', () => this.addGoal('home'));
         document.getElementById('removeHomeGoal').addEventListener('click', () => this.removeGoal('home'));
@@ -194,12 +195,45 @@ class MatchAnalyzer {
             }
         });
 
-        // Cuando la página vuelve a ser visible, actualizar inmediatamente el cronómetro
+        // Handler robusto para cambios de visibilidad (minimizar/maximizar tablet)
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && this.matchData.isRunning) {
-                console.log('Página restaurada - actualizando cronómetro inmediatamente');
-                // Forzar una actualización inmediata al volver a ser visible
-                this.updateMatchTimer();
+            console.log('Cambio de visibilidad detectado:', document.hidden ? 'OCULTA' : 'VISIBLE');
+            
+            if (document.hidden) {
+                // Página se va a ocultar (minimizar)
+                console.log('Guardando estado antes de minimizar...');
+                this.saveMatchData();
+                this.savePlayersToStorage();
+            } else {
+                // Página vuelve a ser visible (maximizar/restaurar)
+                console.log('Restaurando estado después de maximizar...');
+                
+                // Actualizar cronómetro inmediatamente
+                if (this.matchData && this.matchData.isRunning) {
+                    this.updateMatchTimer();
+                    console.log('✓ Cronómetro actualizado');
+                }
+                
+                // Restaurar estado de jugadores y re-renderizar
+                setTimeout(() => {
+                    this.loadPlayersFromStorage();
+                    this.renderPlayers();
+                    console.log('✓ Jugadores renderizados');
+                }, 100);
+                
+                // Actualizar marcadores de goles
+                setTimeout(() => {
+                    this.updateGoalDisplays();
+                    console.log('✓ Marcadores actualizados');
+                }, 200);
+                
+                // Re-renderizar campo con posiciones actuales
+                setTimeout(() => {
+                    this.renderField();
+                    console.log('✓ Campo re-renderizado');
+                }, 300);
+                
+                console.log('Estado completo restaurado después de maximizar');
             }
         });
     }
@@ -421,6 +455,25 @@ class MatchAnalyzer {
 
     newMatch() {
         if (confirm('¿Estás seguro de que quieres iniciar un nuevo partido? Se perderán todos los datos del partido actual.')) {
+            // CORRECCIÓN: Limpieza selectiva para mantener historial de partidos guardados
+            console.log('Limpiando datos del partido anterior...');
+            
+            // SOLUCIÓN MEJORADA: Limpiar solo los datos del partido actual
+            // NO tocar historial de partidos guardados ni base de jugadores
+            const savedMatches = localStorage.getItem('atletico_base_matches');
+            const savedPlayers = localStorage.getItem('atletico_base_players');
+            const savedFollowups = localStorage.getItem('atletico_followups');
+            
+            // Limpiar todo
+            localStorage.clear();
+            
+            // Restaurar datos importantes (NO el historial del partido anterior)
+            if (savedPlayers) localStorage.setItem('atletico_base_players', savedPlayers);
+            if (savedMatches) localStorage.setItem('atletico_base_matches', savedMatches);
+            if (savedFollowups) localStorage.setItem('atletico_followups', savedFollowups);
+            
+            console.log('✓ Datos del partido anterior limpiados - Historial preservado');
+            
             // Reset de datos del partido
             this.matchData = {
                 startTime: null,
@@ -445,6 +498,7 @@ class MatchAnalyzer {
                 player.previousMinutes = 0; // Para fútbol base
                 player.enteredDuringHalftime = false; // Reset marca de descanso
                 player.yellowCards = 0; // Reset tarjetas amarillas
+                player.goals = 0; // SOLUCIÓN 1: Reset explícito de goles
             });
 
             // Reset de interfaz
@@ -733,6 +787,7 @@ class MatchAnalyzer {
             entryMinute: null,
             exitMinute: null,
             yellowCards: 0,          // Inicializar tarjetas amarillas
+            goals: 0,                // NUEVO: Inicializar goles
             x: 50,  // Posición neutral
             y: 50   // Posición neutral
         }));
@@ -1115,6 +1170,7 @@ class MatchAnalyzer {
             entryMinute: null,
             exitMinute: null,
             yellowCards: 0,
+            goals: 0,
             x: this.getDefaultPosition(position).x,
             y: this.getDefaultPosition(position).y
         };
@@ -1204,6 +1260,10 @@ class MatchAnalyzer {
             <div class="minutes">${player.minutesPlayed || 0}'</div>
             ${player.yellowCards && player.yellowCards > 0 ? 
                 `<div class="yellow-card-icon" title="Tarjetas amarillas: ${player.yellowCards}">🟨</div>` : 
+                ''
+            }
+            ${player.goals && player.goals > 0 ? 
+                `<div class="goal-ball-icon" title="Goles: ${player.goals}">⚽${player.goals > 1 ? ' x' + player.goals : ''}</div>` : 
                 ''
             }
         `;
@@ -1748,6 +1808,17 @@ class MatchAnalyzer {
             document.getElementById('homeScore').textContent = this.matchData.homeScore;
             document.getElementById('homeGoalDisplay').textContent = this.matchData.homeScore;
             console.log('✓ Marcador local actualizado:', this.matchData.homeScore);
+            
+            // Incrementar goles del jogador y re-renderizar
+            if (scorer) {
+                if (!scorer.goals) scorer.goals = 0;
+                scorer.goals++;
+                console.log(`✓ Gol registrado para ${scorer.alias}. Total: ${scorer.goals}`);
+                
+                // CRÍTICO: Re-renderizar jugador para mostrar balón
+                this.renderPlayers();
+                this.savePlayersToStorage();
+            }
         } else {
             this.matchData.awayScore++;
             document.getElementById('awayScore').textContent = this.matchData.awayScore;

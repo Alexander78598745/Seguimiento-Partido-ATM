@@ -1156,10 +1156,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: white; /* NÚMERO BLANCO PARA VISIBILIDAD SOBRE FONDO ROJO */
     font-weight: bold;
     font-size: 14px;
     border: 2px solid white;
+    background-color: var(--atletico-red); /* CÍRCULO ROJO PARA MATCH VISIBILIDAD */
 }
 
 .substitute .player-info {
@@ -1918,4 +1919,28 @@ body {
     background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     transform: scale(1.15);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+}
+
+.goal-ball-icon {
+    position: absolute;
+    bottom: -6px;         /* Parte inferior para evitar superposición con tarjetas */
+    right: -6px;          /* Esquina inferior derecha */
+    background: transparent; /* Sin fondo */
+    color: #000000;       /* Negro para mejor visibilidad */
+    border-radius: 3px;      /* Rectangular ligeramente redondeado */
+    width: 16px;          /* Más grande */
+    height: 16px;         /* Más grande */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;      /* Más grande */
+    font-weight: bold;
+    z-index: 15;
+    cursor: help;
+    transition: all 0.2s ease;
+}
+
+.goal-ball-icon:hover {
+    transform: scale(1.2);
+    color: #333333;
 }
