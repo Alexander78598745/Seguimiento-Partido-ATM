@@ -455,24 +455,10 @@ class MatchAnalyzer {
 
     newMatch() {
         if (confirm('¿Estás seguro de que quieres iniciar un nuevo partido? Se perderán todos los datos del partido actual.')) {
-            // CORRECCIÓN: Limpieza selectiva para mantener historial de partidos guardados
-            console.log('Limpiando datos del partido anterior...');
-            
-            // SOLUCIÓN MEJORADA: Limpiar solo los datos del partido actual
-            // NO tocar historial de partidos guardados ni base de jugadores
-            const savedMatches = localStorage.getItem('atletico_base_matches');
-            const savedPlayers = localStorage.getItem('atletico_base_players');
-            const savedFollowups = localStorage.getItem('atletico_followups');
-            
-            // Limpiar todo
+            // SOLUCIÓN 1: Limpiar localStorage para eliminar caché de partidos anteriores
+            console.log('Limpiando localStorage para nuevo partido...');
             localStorage.clear();
-            
-            // Restaurar datos importantes (NO el historial del partido anterior)
-            if (savedPlayers) localStorage.setItem('atletico_base_players', savedPlayers);
-            if (savedMatches) localStorage.setItem('atletico_base_matches', savedMatches);
-            if (savedFollowups) localStorage.setItem('atletico_followups', savedFollowups);
-            
-            console.log('✓ Datos del partido anterior limpiados - Historial preservado');
+            console.log('✓ localStorage limpiado - No habrá datos residuales de goles/tarjetas');
             
             // Reset de datos del partido
             this.matchData = {
@@ -3454,6 +3440,35 @@ document.addEventListener('DOMContentLoaded', () => {
     window.matchAnalyzer = new MatchAnalyzer();
     // Referencia global adicional para compatibilidad
     window.app = window.matchAnalyzer;
+    
+    // Cachear recursos para funcionamiento offline - NO DAÑA FUNCIONALIDAD
+    function cacheAllResources() {
+        const resourcesToCache = [
+            'img[src]',
+            '[data-src]',
+            '.icon',
+            '[style*="background"]'
+        ];
+        
+        resourcesToCache.forEach(selector => {
+            document.querySelectorAll(selector).forEach(element => {
+                const src = element.src || element.getAttribute('data-src');
+                if (src && !src.startsWith('data:')) {
+                    fetch(src)
+                        .then(response => {
+                            caches.open('football-app-v1').then(cache => {
+                                cache.put(src, response.clone());
+                            });
+                        })
+                        .catch(err => console.log('No cacheable:', src));
+                }
+            });
+        });
+    }
+    
+    // Ejecutar inmediatamente y cada minuto para asegurar cache
+    cacheAllResources();
+    setInterval(cacheAllResources, 60000);
 });
 
 // Service Worker
